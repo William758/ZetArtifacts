@@ -1,24 +1,25 @@
-﻿using RoR2;
+using RoR2;
 using RoR2.ContentManagement;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace TPDespair.ZetArtifacts
 {
-    class ZetArtifactsContent : IContentPackProvider
-    {
-        public ContentPack contentPack = new ContentPack();
+	public class ZetArtifactsContent : IContentPackProvider
+	{
+		public ContentPack contentPack = new ContentPack();
 
-        public string identifier
-        {
-            get { return "ZetArtifactsContent"; }
-        }
+		public string identifier
+		{
+			get { return "ZetArtifactsContent"; }
+		}
 
 		public IEnumerator LoadStaticContentAsync(LoadStaticContentAsyncArgs args)
 		{
 			Artifacts.Create();
 
-			contentPack.artifactDefs.Add(Artifacts.artifactDefs);
+			contentPack.artifactDefs.Add(Artifacts.artifactDefs.ToArray());
 			args.ReportProgress(1f);
 			yield break;
 		}
@@ -43,9 +44,10 @@ namespace TPDespair.ZetArtifacts
 			public static ArtifactDef ZetRevivifact;
 			public static ArtifactDef ZetMultifact;
 			public static ArtifactDef ZetDropifact;
+			public static ArtifactDef ZetLoopifact;
 			public static ArtifactDef ZetEclifact;
 
-			public static ArtifactDef[] artifactDefs;
+			public static List<ArtifactDef> artifactDefs = new List<ArtifactDef>();
 
 			public static void Create()
 			{
@@ -60,8 +62,8 @@ namespace TPDespair.ZetArtifacts
 				ZetMultifact.cachedName = "ARTIFACT_ZETMULTIFACT";
 				ZetMultifact.nameToken = "ARTIFACT_ZETMULTIFACT_NAME";
 				ZetMultifact.descriptionToken = "ARTIFACT_ZETMULTIFACT_DESC";
-				ZetMultifact.smallIconSelectedSprite = ZetArtifactsPlugin.CreateSprite(Properties.Resources.zetmulti_selected, Color.magenta);
-				ZetMultifact.smallIconDeselectedSprite = ZetArtifactsPlugin.CreateSprite(Properties.Resources.zetmulti_deselected, Color.gray);
+				ZetMultifact.smallIconSelectedSprite = ZetArtifactsPlugin.CreateSprite(Properties.Resources.zetmultitude_selected, Color.magenta);
+				ZetMultifact.smallIconDeselectedSprite = ZetArtifactsPlugin.CreateSprite(Properties.Resources.zetmultitude_deselected, Color.gray);
 
 				ZetDropifact = ScriptableObject.CreateInstance<ArtifactDef>();
 				ZetDropifact.cachedName = "ARTIFACT_ZETDROPIFACT";
@@ -70,14 +72,26 @@ namespace TPDespair.ZetArtifacts
 				ZetDropifact.smallIconSelectedSprite = ZetArtifactsPlugin.CreateSprite(Properties.Resources.zetdrop_selected, Color.magenta);
 				ZetDropifact.smallIconDeselectedSprite = ZetArtifactsPlugin.CreateSprite(Properties.Resources.zetdrop_deselected, Color.gray);
 
-				ZetEclifact = ScriptableObject.CreateInstance<ArtifactDef>();
-				ZetEclifact.cachedName = "ARTIFACT_ZETECLIFACT";
-				ZetEclifact.nameToken = "ARTIFACT_ZETECLIFACT_NAME";
-				ZetEclifact.descriptionToken = "ARTIFACT_ZETECLIFACT_DESC";
-				ZetEclifact.smallIconSelectedSprite = ZetArtifactsPlugin.CreateSprite(Properties.Resources.zeteclipse_selected, Color.magenta);
-				ZetEclifact.smallIconDeselectedSprite = ZetArtifactsPlugin.CreateSprite(Properties.Resources.zeteclipse_deselected, Color.gray);
+				ZetLoopifact = ScriptableObject.CreateInstance<ArtifactDef>();
+				ZetLoopifact.cachedName = "ARTIFACT_ZETLOOPIFACT";
+				ZetLoopifact.nameToken = "ARTIFACT_ZETLOOPIFACT_NAME";
+				ZetLoopifact.descriptionToken = "ARTIFACT_ZETLOOPIFACT_DESC";
+				ZetLoopifact.smallIconSelectedSprite = ZetArtifactsPlugin.CreateSprite(Properties.Resources.zetloop_selected, Color.magenta);
+				ZetLoopifact.smallIconDeselectedSprite = ZetArtifactsPlugin.CreateSprite(Properties.Resources.zetloop_deselected, Color.gray);
 
-				artifactDefs = new ArtifactDef[] { ZetRevivifact, ZetMultifact, ZetDropifact, ZetEclifact };
+				artifactDefs.AddRange(new ArtifactDef[] { ZetRevivifact, ZetMultifact, ZetDropifact, ZetLoopifact });
+
+				if (ZetArtifactsPlugin.CreateEclipseArtifact())
+				{
+					ZetEclifact = ScriptableObject.CreateInstance<ArtifactDef>();
+					ZetEclifact.cachedName = "ARTIFACT_ZETECLIFACT";
+					ZetEclifact.nameToken = "ARTIFACT_ZETECLIFACT_NAME";
+					ZetEclifact.descriptionToken = "ARTIFACT_ZETECLIFACT_DESC";
+					ZetEclifact.smallIconSelectedSprite = ZetArtifactsPlugin.CreateSprite(Properties.Resources.zeteclipse_selected, Color.magenta);
+					ZetEclifact.smallIconDeselectedSprite = ZetArtifactsPlugin.CreateSprite(Properties.Resources.zeteclipse_deselected, Color.gray);
+
+					artifactDefs.AddRange(new ArtifactDef[] { ZetEclifact });
+				}
 			}
 		}
 	}

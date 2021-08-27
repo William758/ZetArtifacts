@@ -1,21 +1,30 @@
-﻿using BepInEx;
-using MiniRpcLib;
-using R2API;
-using R2API.Utils;
-using RoR2.ContentManagement;
 using System;
 using UnityEngine;
+using BepInEx;
+using R2API;
+using R2API.Utils;
+using MiniRpcLib;
+using RoR2.ContentManagement;
+
+using System.Security;
+using System.Security.Permissions;
+
+[module: UnverifiableCode]
+#pragma warning disable CS0618 // Type or member is obsolete
+[assembly: SecurityPermission(SecurityAction.RequestMinimum, SkipVerification = true)]
+#pragma warning restore CS0618 // Type or member is obsolete
 
 namespace TPDespair.ZetArtifacts
 {
-    [BepInPlugin(ModGuid, ModName, ModVer)]
+	[BepInPlugin(ModGuid, ModName, ModVer)]
 	[BepInDependency(R2API.R2API.PluginGUID)]
-	[R2APISubmoduleDependency(nameof(LanguageAPI))]
+	[R2APISubmoduleDependency(nameof(LanguageAPI), nameof(EliteAPI))]
 	[BepInDependency(MiniRpcPlugin.Dependency)]
+	[BepInDependency("com.TPDespair.DiluvianArtifact", BepInDependency.DependencyFlags.SoftDependency)]
 
 	public class ZetArtifactsPlugin : BaseUnityPlugin
-    {
-		public const string ModVer = "1.0.0";
+	{
+		public const string ModVer = "1.2.0";
 		public const string ModName = "ZetArtifacts";
 		public const string ModGuid = "com.TPDespair.ZetArtifacts";
 
@@ -92,7 +101,7 @@ namespace TPDespair.ZetArtifacts
 
 
 		public void Awake()
-        {
+		{
 			ContentManager.collectContentPackProviders += ContentManager_collectContentPackProviders;
 
 			miniRpc = MiniRpc.CreateInstance(ModGuid);
@@ -100,12 +109,25 @@ namespace TPDespair.ZetArtifacts
 			ZetRevivifact.Init();
 			ZetMultifact.Init();
 			ZetDropifact.Init();
-			ZetEclifact.Init();
+			ZetLoopifact.Init();
+			if (CreateEclipseArtifact()) ZetEclifact.Init();
 		}
 
 		private void ContentManager_collectContentPackProviders(ContentManager.AddContentPackProviderDelegate addContentPackProvider)
 		{
 			addContentPackProvider(new ZetArtifactsContent());
+		}
+
+		internal static bool CreateEclipseArtifact()
+		{
+			return !BepInEx.Bootstrap.Chainloader.PluginInfos.ContainsKey("com.TPDespair.DiluvianArtifact");
+		}
+
+
+
+		public static bool PluginLoaded(string key)
+		{
+			return BepInEx.Bootstrap.Chainloader.PluginInfos.ContainsKey(key);
 		}
 	}
 }

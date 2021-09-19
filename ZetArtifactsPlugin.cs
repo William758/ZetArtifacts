@@ -1,10 +1,10 @@
 using System;
 using UnityEngine;
 using BepInEx;
+using RoR2.ContentManagement;
 using R2API;
 using R2API.Utils;
-using MiniRpcLib;
-using RoR2.ContentManagement;
+using R2API.Networking;
 
 using System.Security;
 using System.Security.Permissions;
@@ -18,19 +18,14 @@ namespace TPDespair.ZetArtifacts
 {
 	[BepInPlugin(ModGuid, ModName, ModVer)]
 	[BepInDependency(R2API.R2API.PluginGUID)]
-	[R2APISubmoduleDependency(nameof(LanguageAPI), nameof(EliteAPI))]
-	[BepInDependency(MiniRpcPlugin.Dependency)]
+	[R2APISubmoduleDependency(nameof(LanguageAPI), nameof(EliteAPI), nameof(NetworkingAPI))]
 	[BepInDependency("com.TPDespair.DiluvianArtifact", BepInDependency.DependencyFlags.SoftDependency)]
 
 	public class ZetArtifactsPlugin : BaseUnityPlugin
 	{
-		public const string ModVer = "1.2.0";
+		public const string ModVer = "1.2.1";
 		public const string ModName = "ZetArtifacts";
 		public const string ModGuid = "com.TPDespair.ZetArtifacts";
-
-
-
-		public static MiniRpcInstance miniRpc;
 
 
 
@@ -104,13 +99,13 @@ namespace TPDespair.ZetArtifacts
 		{
 			ContentManager.collectContentPackProviders += ContentManager_collectContentPackProviders;
 
-			miniRpc = MiniRpc.CreateInstance(ModGuid);
-
 			ZetRevivifact.Init();
 			ZetMultifact.Init();
 			ZetDropifact.Init();
 			ZetLoopifact.Init();
 			if (CreateEclipseArtifact()) ZetEclifact.Init();
+
+			//On.RoR2.Networking.GameNetworkManager.OnClientConnect += (self, user, t) => { };
 		}
 
 		private void ContentManager_collectContentPackProviders(ContentManager.AddContentPackProviderDelegate addContentPackProvider)

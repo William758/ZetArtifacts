@@ -12,11 +12,13 @@ Artifact of the Eclipse - Enables all Eclipse modifiers.
 
 ## Installation:
 
-Requires Bepinex, R2API, MiniRPCLib.
+Requires Bepinex and R2API.
 
 Use r2modman or place inside of Risk of Rain 2/Bepinex/Plugins/
 
 ## Changelog:
+
+v1.2.1 - Switched networking from MiniRPCLib to R2API. Clients now show item drop notification instead of only host seeing all of them. Artifact of Revival only triggers if there is still a living player.
 
 v1.2.0 - Added Artifact of Escalation.
 

@@ -51,37 +51,55 @@ namespace TPDespair.ZetArtifacts
 
 			public static void Create()
 			{
-				ZetRevivifact = ScriptableObject.CreateInstance<ArtifactDef>();
-				ZetRevivifact.cachedName = "ARTIFACT_ZETREVIVIFACT";
-				ZetRevivifact.nameToken = "ARTIFACT_ZETREVIVIFACT_NAME";
-				ZetRevivifact.descriptionToken = "ARTIFACT_ZETREVIVIFACT_DESC";
-				ZetRevivifact.smallIconSelectedSprite = ZetArtifactsPlugin.CreateSprite(Properties.Resources.zetrevive_selected, Color.magenta);
-				ZetRevivifact.smallIconDeselectedSprite = ZetArtifactsPlugin.CreateSprite(Properties.Resources.zetrevive_deselected, Color.gray);
+				if (ZetArtifactsPlugin.RivivifactEnable.Value == 1)
+				{
+					ZetRevivifact = ScriptableObject.CreateInstance<ArtifactDef>();
+					ZetRevivifact.cachedName = "ARTIFACT_ZETREVIVIFACT";
+					ZetRevivifact.nameToken = "ARTIFACT_ZETREVIVIFACT_NAME";
+					ZetRevivifact.descriptionToken = "ARTIFACT_ZETREVIVIFACT_DESC";
+					ZetRevivifact.smallIconSelectedSprite = ZetArtifactsPlugin.CreateSprite(Properties.Resources.zetrevive_selected, Color.magenta);
+					ZetRevivifact.smallIconDeselectedSprite = ZetArtifactsPlugin.CreateSprite(Properties.Resources.zetrevive_deselected, Color.gray);
 
-				ZetMultifact = ScriptableObject.CreateInstance<ArtifactDef>();
-				ZetMultifact.cachedName = "ARTIFACT_ZETMULTIFACT";
-				ZetMultifact.nameToken = "ARTIFACT_ZETMULTIFACT_NAME";
-				ZetMultifact.descriptionToken = "ARTIFACT_ZETMULTIFACT_DESC";
-				ZetMultifact.smallIconSelectedSprite = ZetArtifactsPlugin.CreateSprite(Properties.Resources.zetmultitude_selected, Color.magenta);
-				ZetMultifact.smallIconDeselectedSprite = ZetArtifactsPlugin.CreateSprite(Properties.Resources.zetmultitude_deselected, Color.gray);
+					artifactDefs.Add(ZetRevivifact);
+				}
 
-				ZetDropifact = ScriptableObject.CreateInstance<ArtifactDef>();
-				ZetDropifact.cachedName = "ARTIFACT_ZETDROPIFACT";
-				ZetDropifact.nameToken = "ARTIFACT_ZETDROPIFACT_NAME";
-				ZetDropifact.descriptionToken = "ARTIFACT_ZETDROPIFACT_DESC";
-				ZetDropifact.smallIconSelectedSprite = ZetArtifactsPlugin.CreateSprite(Properties.Resources.zetdrop_selected, Color.magenta);
-				ZetDropifact.smallIconDeselectedSprite = ZetArtifactsPlugin.CreateSprite(Properties.Resources.zetdrop_deselected, Color.gray);
+				if (ZetArtifactsPlugin.MultifactEnable.Value == 1)
+				{
+					ZetMultifact = ScriptableObject.CreateInstance<ArtifactDef>();
+					ZetMultifact.cachedName = "ARTIFACT_ZETMULTIFACT";
+					ZetMultifact.nameToken = "ARTIFACT_ZETMULTIFACT_NAME";
+					ZetMultifact.descriptionToken = "ARTIFACT_ZETMULTIFACT_DESC";
+					ZetMultifact.smallIconSelectedSprite = ZetArtifactsPlugin.CreateSprite(Properties.Resources.zetmultitude_selected, Color.magenta);
+					ZetMultifact.smallIconDeselectedSprite = ZetArtifactsPlugin.CreateSprite(Properties.Resources.zetmultitude_deselected, Color.gray);
 
-				ZetLoopifact = ScriptableObject.CreateInstance<ArtifactDef>();
-				ZetLoopifact.cachedName = "ARTIFACT_ZETLOOPIFACT";
-				ZetLoopifact.nameToken = "ARTIFACT_ZETLOOPIFACT_NAME";
-				ZetLoopifact.descriptionToken = "ARTIFACT_ZETLOOPIFACT_DESC";
-				ZetLoopifact.smallIconSelectedSprite = ZetArtifactsPlugin.CreateSprite(Properties.Resources.zetloop_selected, Color.magenta);
-				ZetLoopifact.smallIconDeselectedSprite = ZetArtifactsPlugin.CreateSprite(Properties.Resources.zetloop_deselected, Color.gray);
+					artifactDefs.Add(ZetMultifact);
+				}
 
-				artifactDefs.AddRange(new ArtifactDef[] { ZetRevivifact, ZetMultifact, ZetDropifact, ZetLoopifact });
+				if (ZetArtifactsPlugin.DropifactEnable.Value == 1)
+				{
+					ZetDropifact = ScriptableObject.CreateInstance<ArtifactDef>();
+					ZetDropifact.cachedName = "ARTIFACT_ZETDROPIFACT";
+					ZetDropifact.nameToken = "ARTIFACT_ZETDROPIFACT_NAME";
+					ZetDropifact.descriptionToken = "ARTIFACT_ZETDROPIFACT_DESC";
+					ZetDropifact.smallIconSelectedSprite = ZetArtifactsPlugin.CreateSprite(Properties.Resources.zetdrop_selected, Color.magenta);
+					ZetDropifact.smallIconDeselectedSprite = ZetArtifactsPlugin.CreateSprite(Properties.Resources.zetdrop_deselected, Color.gray);
 
-				if (ZetArtifactsPlugin.CreateEclipseArtifact())
+					artifactDefs.Add(ZetDropifact);
+				}
+
+				if (ZetArtifactsPlugin.LoopifactEnable.Value == 1)
+				{
+					ZetLoopifact = ScriptableObject.CreateInstance<ArtifactDef>();
+					ZetLoopifact.cachedName = "ARTIFACT_ZETLOOPIFACT";
+					ZetLoopifact.nameToken = "ARTIFACT_ZETLOOPIFACT_NAME";
+					ZetLoopifact.descriptionToken = "ARTIFACT_ZETLOOPIFACT_DESC";
+					ZetLoopifact.smallIconSelectedSprite = ZetArtifactsPlugin.CreateSprite(Properties.Resources.zetloop_selected, Color.magenta);
+					ZetLoopifact.smallIconDeselectedSprite = ZetArtifactsPlugin.CreateSprite(Properties.Resources.zetloop_deselected, Color.gray);
+
+					artifactDefs.Add(ZetLoopifact);
+				}
+
+				if (ZetArtifactsPlugin.EclifactEnable.Value == 1 && !ZetArtifactsPlugin.PluginLoaded("com.TPDespair.DiluvianArtifact"))
 				{
 					ZetEclifact = ScriptableObject.CreateInstance<ArtifactDef>();
 					ZetEclifact.cachedName = "ARTIFACT_ZETECLIFACT";
@@ -90,7 +108,7 @@ namespace TPDespair.ZetArtifacts
 					ZetEclifact.smallIconSelectedSprite = ZetArtifactsPlugin.CreateSprite(Properties.Resources.zeteclipse_selected, Color.magenta);
 					ZetEclifact.smallIconDeselectedSprite = ZetArtifactsPlugin.CreateSprite(Properties.Resources.zeteclipse_deselected, Color.gray);
 
-					artifactDefs.AddRange(new ArtifactDef[] { ZetEclifact });
+					artifactDefs.Add(ZetEclifact);
 				}
 			}
 		}

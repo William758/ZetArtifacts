@@ -1,5 +1,7 @@
 # ZetArtifacts
 
+Can configure artifacts to be disabled or always active.
+
 Artifact of Revival - Dead players respawn after the boss is defeated.
 
 Artifact of Tossing - Allows players to drop and scrap items. (LeftAlt + RMB to scrap)
@@ -17,6 +19,8 @@ Requires Bepinex and R2API.
 Use r2modman or place inside of Risk of Rain 2/Bepinex/Plugins/
 
 ## Changelog:
+
+v1.2.2 - Config to disable or set always active.
 
 v1.2.1 - Switched networking from MiniRPCLib to R2API. Clients now show item drop notification instead of only host seeing all of them. Artifact of Revival only triggers if there is still a living player.
 

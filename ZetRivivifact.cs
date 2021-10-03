@@ -6,8 +6,30 @@ namespace TPDespair.ZetArtifacts
 {
 	public static class ZetRevivifact
 	{
+		private static int state = 0;
+
+		public static bool Enabled
+		{
+			get
+			{
+				if (state < 1) return false;
+				else if (state > 1) return true;
+				else
+				{
+					if (RunArtifactManager.instance && RunArtifactManager.instance.IsArtifactEnabled(ZetArtifactsContent.Artifacts.ZetRevivifact)) return true;
+
+					return false;
+				}
+			}
+		}
+
+
+
 		internal static void Init()
 		{
+			state = ZetArtifactsPlugin.RivivifactEnable.Value;
+			if (state < 1) return;
+
 			ZetArtifactsPlugin.RegisterLanguageToken("ARTIFACT_ZETREVIVIFACT_NAME", "Artifact of Revival");
 			ZetArtifactsPlugin.RegisterLanguageToken("ARTIFACT_ZETREVIVIFACT_DESC", "Dead players respawn after the boss is defeated.");
 
@@ -23,7 +45,7 @@ namespace TPDespair.ZetArtifacts
 			{
 				if (NetworkServer.active)
 				{
-					if (RunArtifactManager.instance.IsArtifactEnabled(ZetArtifactsContent.Artifacts.ZetRevivifact))
+					if (Enabled)
 					{
 						self.transform.position = body.footPosition;
 						self.transform.rotation = body.transform.rotation;
@@ -42,7 +64,7 @@ namespace TPDespair.ZetArtifacts
 
 				if (NetworkServer.active)
 				{
-					if (RunArtifactManager.instance.IsArtifactEnabled(ZetArtifactsContent.Artifacts.ZetRevivifact))
+					if (Enabled)
 					{
 						if (Run.instance && Run.instance.livingPlayerCount > 0)
 						{

@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 using BepInEx;
+using BepInEx.Configuration;
 using RoR2.ContentManagement;
 using R2API;
 using R2API.Utils;
@@ -23,11 +24,70 @@ namespace TPDespair.ZetArtifacts
 
 	public class ZetArtifactsPlugin : BaseUnityPlugin
 	{
-		public const string ModVer = "1.2.1";
+		public const string ModVer = "1.2.2";
 		public const string ModName = "ZetArtifacts";
 		public const string ModGuid = "com.TPDespair.ZetArtifacts";
 
 
+
+		public static ConfigEntry<int> RivivifactEnable { get; set; }
+		public static ConfigEntry<int> MultifactEnable { get; set; }
+		public static ConfigEntry<int> DropifactEnable { get; set; }
+		public static ConfigEntry<int> LoopifactEnable { get; set; }
+		public static ConfigEntry<int> EclifactEnable { get; set; }
+
+
+
+		public void Awake()
+		{
+			ConfigSetup(Config);
+
+			ContentManager.collectContentPackProviders += ContentManager_collectContentPackProviders;
+
+			ZetRevivifact.Init();
+			ZetMultifact.Init();
+			ZetDropifact.Init();
+			ZetLoopifact.Init();
+			ZetEclifact.Init();
+
+			//On.RoR2.Networking.GameNetworkManager.OnClientConnect += (self, user, t) => { };
+		}
+
+
+
+		private static void ConfigSetup(ConfigFile Config)
+		{
+			RivivifactEnable = Config.Bind(
+				"Artifacts", "rivivifactEnable", 1,
+				"Artifact of Revival. 0 = Disabled, 1 = Artifact Available, 2 = Always Active"
+			);
+			MultifactEnable = Config.Bind(
+				"Artifacts", "multifactEnable", 1,
+				"Artifact of Multitudes. 0 = Disabled, 1 = Artifact Available, 2 = Always Active"
+			);
+			DropifactEnable = Config.Bind(
+				"Artifacts", "dropifactEnable", 1,
+				"Artifact of Tossing. 0 = Disabled, 1 = Artifact Available, 2 = Always Active"
+			);
+			LoopifactEnable = Config.Bind(
+				"Artifacts", "loopifactEnable", 1,
+				"Artifact of Escalation. 0 = Disabled, 1 = Artifact Available, 2 = Always Active"
+			);
+			EclifactEnable = Config.Bind(
+				"Artifacts", "eclifactEnable", 1,
+				"Artifact of the Eclipse. 0 = Disabled, 1 = Artifact Available, 2 = Always Active"
+			);
+		}
+
+		private void ContentManager_collectContentPackProviders(ContentManager.AddContentPackProviderDelegate addContentPackProvider)
+		{
+			addContentPackProvider(new ZetArtifactsContent());
+		}
+
+		public static void RegisterLanguageToken(string token, string text)
+		{
+			LanguageAPI.Add(token, text);
+		}
 
 		public static Sprite CreateSprite(byte[] resourceBytes, Color fallbackColor)
 		{
@@ -84,38 +144,6 @@ namespace TPDespair.ZetArtifacts
 			tex.Apply();
 
 			return tex;
-		}
-
-
-
-		public static void RegisterLanguageToken(string token, string text)
-		{
-			LanguageAPI.Add(token, text);
-		}
-
-
-
-		public void Awake()
-		{
-			ContentManager.collectContentPackProviders += ContentManager_collectContentPackProviders;
-
-			ZetRevivifact.Init();
-			ZetMultifact.Init();
-			ZetDropifact.Init();
-			ZetLoopifact.Init();
-			if (CreateEclipseArtifact()) ZetEclifact.Init();
-
-			//On.RoR2.Networking.GameNetworkManager.OnClientConnect += (self, user, t) => { };
-		}
-
-		private void ContentManager_collectContentPackProviders(ContentManager.AddContentPackProviderDelegate addContentPackProvider)
-		{
-			addContentPackProvider(new ZetArtifactsContent());
-		}
-
-		internal static bool CreateEclipseArtifact()
-		{
-			return !BepInEx.Bootstrap.Chainloader.PluginInfos.ContainsKey("com.TPDespair.DiluvianArtifact");
 		}
 
 

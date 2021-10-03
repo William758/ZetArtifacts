@@ -1,4 +1,4 @@
-﻿using RoR2;
+using RoR2;
 using R2API.Utils;
 using MonoMod.Cil;
 using MonoMod.RuntimeDetour;
@@ -6,76 +6,98 @@ using System;
 
 namespace TPDespair.ZetArtifacts
 {
-    public static class ZetMultifact
-    {
-        internal static void Init()
-        {
-            ZetArtifactsPlugin.RegisterLanguageToken("ARTIFACT_ZETMULTIFACT_NAME", "Artifact of Multitudes");
-            ZetArtifactsPlugin.RegisterLanguageToken("ARTIFACT_ZETMULTIFACT_DESC", "Double player count scaling.");
+	public static class ZetMultifact
+	{
+		private static int state = 0;
 
-            PlayerCountHook();
-            PlayerTriggerHook();
-        }
+		public static bool Enabled
+		{
+			get
+			{
+				if (state < 1) return false;
+				else if (state > 1) return true;
+				else
+				{
+					if (RunArtifactManager.instance && RunArtifactManager.instance.IsArtifactEnabled(ZetArtifactsContent.Artifacts.ZetMultifact)) return true;
 
-
-
-        private delegate int RunInstanceReturnInt(Run self);
-        private static RunInstanceReturnInt origLivingPlayerCountGetter;
-        private static RunInstanceReturnInt origParticipatingPlayerCountGetter;
-
-        private static int GetLivingPlayerCountHook(Run self) => origLivingPlayerCountGetter(self) * GetMultiplier();
-        private static int GetParticipatingPlayerCountHook(Run self) => origParticipatingPlayerCountGetter(self) * GetMultiplier();
-
-        private static int GetMultiplier()
-        {
-            if (RunArtifactManager.instance.IsArtifactEnabled(ZetArtifactsContent.Artifacts.ZetMultifact)) return 2;
-            return 1;
-        }
+					return false;
+				}
+			}
+		}
 
 
 
-        private static void PlayerCountHook()
-        {
-            var getLivingPlayerCountHook = new Hook(typeof(Run).GetMethodCached("get_livingPlayerCount"), typeof(ZetMultifact).GetMethodCached(nameof(GetLivingPlayerCountHook)));
-            origLivingPlayerCountGetter = getLivingPlayerCountHook.GenerateTrampoline<RunInstanceReturnInt>();
+		internal static void Init()
+		{
+			state = ZetArtifactsPlugin.MultifactEnable.Value;
+			if (state < 1) return;
 
-            var getParticipatingPlayerCount = new Hook(typeof(Run).GetMethodCached("get_participatingPlayerCount"), typeof(ZetMultifact).GetMethodCached(nameof(GetParticipatingPlayerCountHook)));
-            origParticipatingPlayerCountGetter = getParticipatingPlayerCount.GenerateTrampoline<RunInstanceReturnInt>();
-        }
+			ZetArtifactsPlugin.RegisterLanguageToken("ARTIFACT_ZETMULTIFACT_NAME", "Artifact of Multitudes");
+			ZetArtifactsPlugin.RegisterLanguageToken("ARTIFACT_ZETMULTIFACT_DESC", "Double player count scaling.");
+
+			PlayerCountHook();
+			PlayerTriggerHook();
+		}
 
 
 
-        private static void PlayerTriggerHook()
-        {
-            IL.RoR2.AllPlayersTrigger.FixedUpdate += (il) =>
-            {
-                ILCursor c = new ILCursor(il);
+		private delegate int RunInstanceReturnInt(Run self);
+		private static RunInstanceReturnInt origLivingPlayerCountGetter;
+		private static RunInstanceReturnInt origParticipatingPlayerCountGetter;
 
-                c.GotoNext(
-                    x => x.MatchCallOrCallvirt<Run>("get_livingPlayerCount")
-                );
+		private static int GetLivingPlayerCountHook(Run self) => origLivingPlayerCountGetter(self) * GetMultiplier();
+		private static int GetParticipatingPlayerCountHook(Run self) => origParticipatingPlayerCountGetter(self) * GetMultiplier();
 
-                c.Index += 1;
+		private static int GetMultiplier()
+		{
+			if (Enabled) return 2;
+			return 1;
+		}
 
-                c.EmitDelegate<Func<int, int>>((livingPlayerCount) => {
-                    return livingPlayerCount / GetMultiplier();
-                });
-            };
 
-            IL.RoR2.MultiBodyTrigger.FixedUpdate += (il) =>
-            {
-                ILCursor c = new ILCursor(il);
 
-                c.GotoNext(
-                    x => x.MatchCallOrCallvirt<Run>("get_livingPlayerCount")
-                );
+		private static void PlayerCountHook()
+		{
+			var getLivingPlayerCountHook = new Hook(typeof(Run).GetMethodCached("get_livingPlayerCount"), typeof(ZetMultifact).GetMethodCached(nameof(GetLivingPlayerCountHook)));
+			origLivingPlayerCountGetter = getLivingPlayerCountHook.GenerateTrampoline<RunInstanceReturnInt>();
 
-                c.Index += 1;
+			var getParticipatingPlayerCount = new Hook(typeof(Run).GetMethodCached("get_participatingPlayerCount"), typeof(ZetMultifact).GetMethodCached(nameof(GetParticipatingPlayerCountHook)));
+			origParticipatingPlayerCountGetter = getParticipatingPlayerCount.GenerateTrampoline<RunInstanceReturnInt>();
+		}
 
-                c.EmitDelegate<Func<int, int>>((livingPlayerCount) => {
-                    return livingPlayerCount / GetMultiplier();
-                });
-            };
-        }
-    }
+
+
+		private static void PlayerTriggerHook()
+		{
+			IL.RoR2.AllPlayersTrigger.FixedUpdate += (il) =>
+			{
+				ILCursor c = new ILCursor(il);
+
+				c.GotoNext(
+					x => x.MatchCallOrCallvirt<Run>("get_livingPlayerCount")
+				);
+
+				c.Index += 1;
+
+				c.EmitDelegate<Func<int, int>>((livingPlayerCount) => {
+					return livingPlayerCount / GetMultiplier();
+				});
+			};
+
+			IL.RoR2.MultiBodyTrigger.FixedUpdate += (il) =>
+			{
+				ILCursor c = new ILCursor(il);
+
+				c.GotoNext(
+					x => x.MatchCallOrCallvirt<Run>("get_livingPlayerCount")
+				);
+
+				c.Index += 1;
+
+				c.EmitDelegate<Func<int, int>>((livingPlayerCount) => {
+					return livingPlayerCount / GetMultiplier();
+				});
+			};
+		}
+	}
 }

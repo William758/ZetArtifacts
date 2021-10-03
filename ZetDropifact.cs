@@ -100,8 +100,32 @@ namespace TPDespair.ZetArtifacts
 
 		public static ItemIndex LunarScrapIndex = ItemIndex.None;
 
+
+
+		private static int state = 0;
+
+		public static bool Enabled
+		{
+			get
+			{
+				if (state < 1) return false;
+				else if (state > 1) return true;
+				else
+				{
+					if (RunArtifactManager.instance && RunArtifactManager.instance.IsArtifactEnabled(ZetArtifactsContent.Artifacts.ZetDropifact)) return true;
+
+					return false;
+				}
+			}
+		}
+
+
+
 		internal static void Init()
 		{
+			state = ZetArtifactsPlugin.DropifactEnable.Value;
+			if (state < 1) return;
+
 			ZetArtifactsPlugin.RegisterLanguageToken("ARTIFACT_ZETDROPIFACT_NAME", "Artifact of Tossing");
 			ZetArtifactsPlugin.RegisterLanguageToken("ARTIFACT_ZETDROPIFACT_DESC", "Allows players to drop and scrap items.\n\n<style=cStack>LeftAlt + RMB to scrap</style>");
 
@@ -118,7 +142,7 @@ namespace TPDespair.ZetArtifacts
 
 		internal static void HandlePointerClick(ZetDropHandler handler, PointerEventData eventData)
 		{
-			if (!RunArtifactManager.instance.IsArtifactEnabled(ZetArtifactsContent.Artifacts.ZetDropifact)) return;
+			if (!Enabled) return;
 
 			Inventory inventory = handler.GetInventory();
 			if (!inventory.hasAuthority) return;
@@ -181,7 +205,7 @@ namespace TPDespair.ZetArtifacts
 
 		internal static void HandleServerReply(ZetDropReply dropReply)
 		{
-			if (!RunArtifactManager.instance.IsArtifactEnabled(ZetArtifactsContent.Artifacts.ZetDropifact)) return;
+			if (!Enabled) return;
 
 			CharacterBody body = dropReply.Body;
 			if (!body || !LocalBody || body != LocalBody) return;
@@ -207,7 +231,7 @@ namespace TPDespair.ZetArtifacts
 
 		internal static bool HandleClientRequest(ZetDropRequest dropRequest)
 		{
-			if (!RunArtifactManager.instance.IsArtifactEnabled(ZetArtifactsContent.Artifacts.ZetDropifact)) return false;
+			if (!Enabled) return false;
 
 			CharacterBody body = dropRequest.Body;
 			if (!body) return false;

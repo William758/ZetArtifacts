@@ -15,13 +15,32 @@ namespace TPDespair.ZetArtifacts
 
 		public static EliteDef ImpaleElite;
 
-		internal static bool IsEnabled()
+
+
+		private static int state = 0;
+
+		public static bool Enabled
 		{
-			return RunArtifactManager.instance.IsArtifactEnabled(ZetArtifactsContent.Artifacts.ZetLoopifact);
+			get
+			{
+				if (state < 1) return false;
+				else if (state > 1) return true;
+				else
+				{
+					if (RunArtifactManager.instance && RunArtifactManager.instance.IsArtifactEnabled(ZetArtifactsContent.Artifacts.ZetLoopifact)) return true;
+
+					return false;
+				}
+			}
 		}
+
+
 
 		internal static void Init()
 		{
+			state = ZetArtifactsPlugin.LoopifactEnable.Value;
+			if (state < 1) return;
+
 			ZetArtifactsPlugin.RegisterLanguageToken("ARTIFACT_ZETLOOPIFACT_NAME", "Artifact of Escalation");
 			ZetArtifactsPlugin.RegisterLanguageToken("ARTIFACT_ZETLOOPIFACT_DESC", "Monsters, interactables and elites can appear earlier than usual.");
 
@@ -88,7 +107,7 @@ namespace TPDespair.ZetArtifacts
 					if (ImpaleElite != null) eliteDefs.Add(ImpaleElite);
 				}
 
-				if (IsEnabled()) Debug.LogWarning("ZetArtifact [ZetLoopifact] - RebuildEliteTypeArray : " + eliteDefs.Count);
+				if (Enabled) Debug.LogWarning("ZetArtifact [ZetLoopifact] - RebuildEliteTypeArray : " + eliteDefs.Count);
 				EarlyEliteDef.eliteTypes = eliteDefs.ToArray();
 			}
 		}
@@ -119,7 +138,7 @@ namespace TPDespair.ZetArtifacts
 
 					c.EmitDelegate<Func<int, int>>((stage) =>
 					{
-						if (IsEnabled()) return 0;
+						if (Enabled) return 0;
 
 						return stage;
 					});
@@ -145,7 +164,7 @@ namespace TPDespair.ZetArtifacts
 				{
 					c.EmitDelegate<Func<float, float>>((value) =>
 					{
-						if (!IsEnabled()) return value;
+						if (!Enabled) return value;
 
 						Run run = Run.instance;
 						if (run && run.stageClearCount < 5) value *= 1.1f;
@@ -192,7 +211,7 @@ namespace TPDespair.ZetArtifacts
 
 		private static bool IsEarlyEliteDefAvailable(SpawnCard.EliteRules rules)
 		{
-			if (DisableEarlyEliteDef || !IsEnabled()) return false;
+			if (DisableEarlyEliteDef || !Enabled) return false;
 
 			if (rules == SpawnCard.EliteRules.Lunar && CombatDirector.IsEliteOnlyArtifactActive()) return true;
 			if (rules == SpawnCard.EliteRules.Default && Run.instance.loopClearCount == 0) return true;

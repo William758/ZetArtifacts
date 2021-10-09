@@ -32,8 +32,15 @@ namespace TPDespair.ZetArtifacts
 			state = ZetArtifactsPlugin.MultifactEnable.Value;
 			if (state < 1) return;
 
+			int countMult = Math.Max(2, ZetArtifactsPlugin.MultifactMultiplier.Value);
+
 			ZetArtifactsPlugin.RegisterLanguageToken("ARTIFACT_ZETMULTIFACT_NAME", "Artifact of Multitudes");
-			ZetArtifactsPlugin.RegisterLanguageToken("ARTIFACT_ZETMULTIFACT_DESC", "Double player count scaling.");
+			string str;
+			if (countMult == 2) str = "Double";
+			else if (countMult == 3) str = "Triple";
+			else if (countMult == 4) str = "Quadruple";
+			else str = "x" + countMult;
+			ZetArtifactsPlugin.RegisterLanguageToken("ARTIFACT_ZETMULTIFACT_DESC", str + " player count scaling.");
 
 			PlayerCountHook();
 			PlayerTriggerHook();
@@ -50,7 +57,7 @@ namespace TPDespair.ZetArtifacts
 
 		private static int GetMultiplier()
 		{
-			if (Enabled) return 2;
+			if (Enabled) return Math.Max(2, ZetArtifactsPlugin.MultifactMultiplier.Value);
 			return 1;
 		}
 

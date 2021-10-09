@@ -8,7 +8,7 @@ Artifact of Tossing - Allows players to drop and scrap items. (LeftAlt + RMB to 
 
 Artifact of Multitudes - Double player count scaling. (stacks multiplicatively with original multitudes)
 
-Artifact of Escalation - Monsters, interactables and elites can appear earlier than usual.
+Artifact of Escalation - Monster and interactable types can appear earlier than usual. Post-loop Elites begin to appear at monster level 10.
 
 Artifact of the Eclipse - Enables all Eclipse modifiers.
 
@@ -20,7 +20,9 @@ Use r2modman or place inside of Risk of Rain 2/Bepinex/Plugins/
 
 ## Changelog:
 
-v1.2.2 - Config to disable or set always active.
+v1.2.3 - Configs for some artifact values. Scale Erythrite DOT based on ambient level. Don't populate Escalation EliteDef until run starts.
+
+v1.2.2 - Configure artifacts to be disabled or set always active.
 
 v1.2.1 - Switched networking from MiniRPCLib to R2API. Clients now show item drop notification instead of only host seeing all of them. Artifact of Revival only triggers if there is still a living player.
 

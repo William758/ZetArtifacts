@@ -145,7 +145,7 @@ namespace TPDespair.ZetArtifacts
 			if (!Enabled) return;
 
 			Inventory inventory = handler.GetInventory();
-			if (!inventory.hasAuthority) return;
+			if (!inventory || !inventory.hasAuthority) return;
 
 			CharacterMaster master = inventory.GetComponent<CharacterMaster>();
 			if (!master) return;
@@ -267,6 +267,10 @@ namespace TPDespair.ZetArtifacts
 		{
 			if (index == EquipmentIndex.None) return false;
 
+			EquipmentDef equipDef = EquipmentCatalog.GetEquipmentDef(index);
+
+			if (!ZetArtifactsPlugin.DropifactLunar.Value && equipDef.isLunar) return false;
+
 			if (scrap) return false;
 
 			return true;
@@ -276,11 +280,15 @@ namespace TPDespair.ZetArtifacts
 		{
 			if (index == ItemIndex.None) return false;
 
-			if (ItemCatalog.GetItemDef(index).tier == ItemTier.NoTier) return false;
+			ItemDef itemDef = ItemCatalog.GetItemDef(index);
+
+			if (itemDef.tier == ItemTier.NoTier) return false;
+
+			if (!ZetArtifactsPlugin.DropifactLunar.Value && itemDef.tier == ItemTier.Lunar) return false;
 
 			if (scrap)
 			{
-				switch (ItemCatalog.GetItemDef(index).tier)
+				switch (itemDef.tier)
 				{
 					case ItemTier.Tier1:
 					case ItemTier.Tier2:

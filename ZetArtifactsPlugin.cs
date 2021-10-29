@@ -24,7 +24,7 @@ namespace TPDespair.ZetArtifacts
 
 	public class ZetArtifactsPlugin : BaseUnityPlugin
 	{
-		public const string ModVer = "1.2.3";
+		public const string ModVer = "1.2.4";
 		public const string ModName = "ZetArtifacts";
 		public const string ModGuid = "com.TPDespair.ZetArtifacts";
 
@@ -34,7 +34,9 @@ namespace TPDespair.ZetArtifacts
 		public static ConfigEntry<int> MultifactEnable { get; set; }
 		public static ConfigEntry<int> MultifactMultiplier { get; set; }
 		public static ConfigEntry<int> DropifactEnable { get; set; }
+		public static ConfigEntry<bool> DropifactRemoveScrapper { get; set; }
 		public static ConfigEntry<bool> DropifactLunar { get; set; }
+		public static ConfigEntry<bool> DropifactUnique { get; set; }
 		public static ConfigEntry<int> LoopifactEnable { get; set; }
 		public static ConfigEntry<int> LoopifactEliteLevel { get; set; }
 		public static ConfigEntry<bool> LoopifactScaleImpale { get; set; }
@@ -77,9 +79,17 @@ namespace TPDespair.ZetArtifacts
 				"Artifacts", "dropifactEnable", 1,
 				"Artifact of Tossing. 0 = Disabled, 1 = Artifact Available, 2 = Always Active"
 			);
+			DropifactRemoveScrapper = Config.Bind(
+				"Artifacts", "dropifactRemoveScrapper", false,
+				"Prevent scrappers from appearing while artifact is active."
+			);
 			DropifactLunar = Config.Bind(
 				"Artifacts", "dropifactLunar", true,
 				"Allow dropping lunar items."
+			);
+			DropifactUnique = Config.Bind(
+				"Artifacts", "dropifactUnique", true,
+				"Allow dropping WorldUnique items."
 			);
 			LoopifactEnable = Config.Bind(
 				"Artifacts", "loopifactEnable", 1,

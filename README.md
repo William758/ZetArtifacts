@@ -20,6 +20,8 @@ Use r2modman or place inside of Risk of Rain 2/Bepinex/Plugins/
 
 ## Changelog:
 
+v1.2.4 - Config to disable dropping WorldUnique items. Config to remove scrappers while using Artifact of Tossing. Prevent scrapping ArtifactKey. Null-check impaleDotIndexField.
+
 v1.2.3 - Configs for some artifact values. Scale Erythrite DOT based on ambient level. Don't populate Escalation EliteDef until run starts.
 
 v1.2.2 - Configure artifacts to be disabled or set always active.

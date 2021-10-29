@@ -95,9 +95,16 @@ namespace TPDespair.ZetArtifacts
 					Type type = Type.GetType("EliteVariety.Buffs.ImpPlaneImpaled, " + PluginAssembly.FullName, false);
 					if (type != null) {
 						FieldInfo indexField = type.GetField("dotIndex", Flags);
-						impaleDotIndex = (DotController.DotIndex)indexField.GetValue(type);
+						if (indexField != null)
+						{
+							impaleDotIndex = (DotController.DotIndex)indexField.GetValue(type);
 
-						Debug.LogWarning("ZetArtifact [ZetLoopifact] - Impale DotIndex : " + impaleDotIndex);
+							Debug.LogWarning("ZetArtifact [ZetLoopifact] - Impale DotIndex : " + impaleDotIndex);
+						}
+						else
+						{
+							Debug.LogWarning("ZetArtifact [ZetLoopifact] - Could Not Find Field : ImpPlaneImpaled.dotIndex");
+						}
 					}
 					else
 					{
@@ -121,10 +128,10 @@ namespace TPDespair.ZetArtifacts
 				string sceneName = sceneDefForCurrentScene ? sceneDefForCurrentScene.baseSceneName : "";
 
 				List<EliteDef> eliteDefs = new List<EliteDef>
-                {
-                    RoR2Content.Elites.Haunted,
-                    RoR2Content.Elites.Poison
-                };
+				{
+					RoR2Content.Elites.Haunted,
+					RoR2Content.Elites.Poison
+				};
 
 				if (sceneName != "moon2" && ZetArtifactsPlugin.PluginLoaded("com.arimah.PerfectedLoop"))
 				{
@@ -176,22 +183,17 @@ namespace TPDespair.ZetArtifacts
 						if (atkBody && atkBody.teamComponent.teamIndex == TeamIndex.Player) isPlayer = true;
 
 						float mult = Mathf.Clamp(Run.instance.ambientLevel / 90f, 0.05f, 1f);
-						if (!isPlayer)
-						{
-							damage *= mult;
-							duration *= mult;
-						}
-						else
+						if (isPlayer)
 						{
 							mult = 1 - mult;
 							mult *= mult;
 							mult = 1 - mult;
-
-							damage *= mult;
-							duration *= mult;
 						}
 
-						duration = Mathf.Ceil(duration / 5f) * 5f + 0.1f;
+						damage *= mult;
+						duration *= mult;
+
+						duration = Mathf.Ceil(duration / 5f) * 5f + 4.99f;
 					}
 				}
 
@@ -274,16 +276,16 @@ namespace TPDespair.ZetArtifacts
 
 			Debug.LogWarning("ZetArtifact [ZetLoopifact] - DefineEliteTier : EarlyEliteDef");
 
-            earlyEliteDef = new CombatDirector.EliteTierDef
-            {
-                costMultiplier = Mathf.LerpUnclamped(1f, CombatDirector.baseEliteCostMultiplier * 6f, 0.35f),
-                damageBoostCoefficient = Mathf.LerpUnclamped(1f, CombatDirector.baseEliteDamageBoostCoefficient * 3f, 0.35f),
-                healthBoostCoefficient = Mathf.LerpUnclamped(1f, CombatDirector.baseEliteHealthBoostCoefficient * 4.5f, 0.35f),
-                eliteTypes = new EliteDef[] { },
-                isAvailable = ((SpawnCard.EliteRules rules) => IsEarlyEliteDefAvailable(rules))
-            };
+			earlyEliteDef = new CombatDirector.EliteTierDef
+			{
+				costMultiplier = Mathf.LerpUnclamped(1f, CombatDirector.baseEliteCostMultiplier * 6f, 0.35f),
+				damageBoostCoefficient = Mathf.LerpUnclamped(1f, CombatDirector.baseEliteDamageBoostCoefficient * 3f, 0.35f),
+				healthBoostCoefficient = Mathf.LerpUnclamped(1f, CombatDirector.baseEliteHealthBoostCoefficient * 4.5f, 0.35f),
+				eliteTypes = new EliteDef[] { },
+				isAvailable = ((SpawnCard.EliteRules rules) => IsEarlyEliteDefAvailable(rules))
+			};
 
-            Debug.LogWarning("ZetArtifact [ZetLoopifact] - AddCustomEliteTier : EarlyEliteDef");
+			Debug.LogWarning("ZetArtifact [ZetLoopifact] - AddCustomEliteTier : EarlyEliteDef");
 			EliteAPI.AddCustomEliteTier(earlyEliteDef, index);
 		}
 

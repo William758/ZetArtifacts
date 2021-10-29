@@ -99,6 +99,7 @@ namespace TPDespair.ZetArtifacts
 		public static CharacterBody LocalBody;
 
 		public static ItemIndex LunarScrapIndex = ItemIndex.None;
+		public static ItemIndex ArtifactKeyIndex = ItemIndex.None;
 
 
 
@@ -132,10 +133,12 @@ namespace TPDespair.ZetArtifacts
 			NetworkingAPI.RegisterMessageType<ZetDropReply>();
 			NetworkingAPI.RegisterMessageType<ZetDropRequest>();
 
-			ItemCatalog.availability.CallWhenAvailable(FindLunarScrapIndex);
+			ItemCatalog.availability.CallWhenAvailable(FindIndexes);
 
 			ItemIconHook();
 			EquipmentIconHook();
+
+			SceneDirector.onGenerateInteractableCardSelection += RemoveScrapperCard;
 		}
 
 
@@ -280,11 +283,14 @@ namespace TPDespair.ZetArtifacts
 		{
 			if (index == ItemIndex.None) return false;
 
+			if (index == ArtifactKeyIndex && scrap) return false;
+
 			ItemDef itemDef = ItemCatalog.GetItemDef(index);
 
 			if (itemDef.tier == ItemTier.NoTier) return false;
 
 			if (!ZetArtifactsPlugin.DropifactLunar.Value && itemDef.tier == ItemTier.Lunar) return false;
+			if (!ZetArtifactsPlugin.DropifactUnique.Value && itemDef.ContainsTag(ItemTag.WorldUnique)) return false;
 
 			if (scrap)
 			{
@@ -408,14 +414,12 @@ namespace TPDespair.ZetArtifacts
 
 
 
-		private static void FindLunarScrapIndex()
+		private static void FindIndexes()
 		{
 			ItemIndex index = ItemCatalog.FindItemIndex("ScrapLunar");
-			if (index != ItemIndex.None)
-			{
-				LunarScrapIndex = index;
-				Debug.LogWarning("LunarScrapIndex : " + LunarScrapIndex);
-			}
+			if (index != ItemIndex.None) LunarScrapIndex = index;
+			index = ItemCatalog.FindItemIndex("ArtifactKey");
+			if (index != ItemIndex.None) ArtifactKeyIndex = index;
 		}
 
 
@@ -476,5 +480,22 @@ namespace TPDespair.ZetArtifacts
 			dropItemHandler.GetInventory = () => icon.targetInventory;
 			dropItemHandler.EquipmentIcon = true;
 		}
+
+
+
+		private static void RemoveScrapperCard(SceneDirector sceneDirector, DirectorCardCategorySelection dccs)
+		{
+			if (Enabled && ZetArtifactsPlugin.DropifactRemoveScrapper.Value)
+			{
+				dccs.RemoveCardsThatFailFilter(new Predicate<DirectorCard>(NotScrapper));
+			}
+		}
+
+		private static bool NotScrapper(DirectorCard card)
+		{
+			GameObject prefab = card.spawnCard.prefab;
+			return !prefab.GetComponent<ScrapperController>();
+		}
+
 	}
 }

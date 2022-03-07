@@ -101,6 +101,8 @@ namespace TPDespair.ZetArtifacts
 		public static ItemIndex LunarScrapIndex = ItemIndex.None;
 		public static ItemIndex ArtifactKeyIndex = ItemIndex.None;
 
+		public static bool appliedVoidBearFix = false;
+
 
 
 		private static int state = 0;
@@ -137,6 +139,9 @@ namespace TPDespair.ZetArtifacts
 
 			ItemIconHook();
 			EquipmentIconHook();
+
+			PreventVoidBearBuffBug();
+			appliedVoidBearFix = true;
 
 			SceneDirector.onGenerateInteractableCardSelection += RemoveScrapperCard;
 		}
@@ -290,26 +295,46 @@ namespace TPDespair.ZetArtifacts
 			if (itemDef.tier == ItemTier.NoTier) return false;
 
 			if (!ZetArtifactsPlugin.DropifactLunar.Value && itemDef.tier == ItemTier.Lunar) return false;
+			if (!ZetArtifactsPlugin.DropifactVoid.Value && IsVoidTier(itemDef.tier)) return false;
 			if (!ZetArtifactsPlugin.DropifactUnique.Value && itemDef.ContainsTag(ItemTag.WorldUnique)) return false;
 
-			if (scrap)
-			{
-				switch (itemDef.tier)
-				{
-					case ItemTier.Tier1:
-					case ItemTier.Tier2:
-					case ItemTier.Tier3:
-					case ItemTier.Boss:
-						return true;
-					case ItemTier.Lunar:
-						if (LunarScrapIndex != ItemIndex.None) return true;
-						else return false;
-					default:
-						return false;
-				}
-			}
+			if (scrap) return IsScrapable(itemDef.tier);
 
 			return true;
+		}
+
+
+
+		private static bool IsScrapable(ItemTier tier)
+		{
+			switch (tier)
+			{
+				case ItemTier.Tier1:
+				case ItemTier.Tier2:
+				case ItemTier.Tier3:
+				case ItemTier.Boss:
+					return true;
+				case ItemTier.Lunar:
+					if (LunarScrapIndex != ItemIndex.None) return true;
+					else return false;
+				case ItemTier.VoidTier1:
+				case ItemTier.VoidTier2:
+				case ItemTier.VoidTier3:
+				case ItemTier.VoidBoss:
+					return false;
+				default:
+					return false;
+			}
+		}
+
+		private static bool IsVoidTier(ItemTier tier)
+		{
+			if (tier == ItemTier.VoidTier1) return true;
+			if (tier == ItemTier.VoidTier2) return true;
+			if (tier == ItemTier.VoidTier3) return true;
+			if (tier == ItemTier.VoidBoss) return true;
+
+			return false;
 		}
 
 
@@ -405,11 +430,18 @@ namespace TPDespair.ZetArtifacts
 		private static void CreateNotification(CharacterBody body, string title, string description, Texture texture)
 		{
 			var notification = body.gameObject.AddComponent<Notification>();
-			notification.transform.SetParent(body.transform);
-			notification.SetPosition(new Vector3((float)(Screen.width * 0.8), (float)(Screen.height * 0.25), 0));
-			notification.SetIcon(texture);
-			notification.GetTitle = () => title;
-			notification.GetDescription = () => description;
+			if (notification)
+			{
+				notification.transform.SetParent(body.transform);
+				float x = Screen.width * 0.8f;
+				float y = Screen.height * 0.25f;
+				notification.SetPosition(new Vector3(x, y, 0));
+				notification.SetIcon(texture);
+				notification.GetTitle = () => title;
+				notification.GetDescription = () => description;
+
+				UnityEngine.Object.Destroy(notification, 4.25f);
+			}
 		}
 
 
@@ -479,6 +511,58 @@ namespace TPDespair.ZetArtifacts
 			var dropItemHandler = icon.transform.gameObject.AddComponent<ZetDropHandler>();
 			dropItemHandler.GetInventory = () => icon.targetInventory;
 			dropItemHandler.EquipmentIcon = true;
+		}
+
+
+
+		private static void PreventVoidBearBuffBug()
+		{
+			//On.RoR2.CharacterMaster.OnBodyStart += CharacterMaster_OnBodyStart;
+
+			On.RoR2.CharacterBody.AddTimedBuff_BuffDef_float += CharacterBody_AddTimedBuff_BuffDef_float;
+			On.RoR2.CharacterBody.RemoveBuff_BuffIndex += CharacterBody_RemoveBuff_BuffIndex;
+		}
+		/*
+		private static void CharacterMaster_OnBodyStart(On.RoR2.CharacterMaster.orig_OnBodyStart orig, CharacterMaster self, CharacterBody body)
+		{
+			orig(self, body);
+
+			if (NetworkServer.active)
+			{
+				Inventory inventory = self.inventory;
+				if (inventory && body.isPlayerControlled)
+				{
+					inventory.GiveItem(DLC1Content.Items.BearVoid);
+				}
+			}
+		}
+		*/
+		private static void CharacterBody_AddTimedBuff_BuffDef_float(On.RoR2.CharacterBody.orig_AddTimedBuff_BuffDef_float orig, CharacterBody self, BuffDef buffDef, float duration)
+		{
+			if (NetworkServer.active)
+			{
+				BuffIndex buff = DLC1Content.Buffs.BearVoidCooldown.buffIndex;
+
+				if (buffDef.buffIndex == buff && self.GetBuffCount(buff) < 1)
+				{
+					self.ClearTimedBuffs(buff);
+					self.SetBuffCount(buff, 0);
+				}
+			}
+
+			orig(self, buffDef, duration);
+		}
+
+		private static void CharacterBody_RemoveBuff_BuffIndex(On.RoR2.CharacterBody.orig_RemoveBuff_BuffIndex orig, CharacterBody self, BuffIndex buffType)
+		{
+			if (NetworkServer.active)
+			{
+				BuffIndex buff = DLC1Content.Buffs.BearVoidCooldown.buffIndex;
+
+				if (buffType == buff && self.GetBuffCount(buff) < 1) return;
+			}
+
+			orig(self, buffType);
 		}
 
 

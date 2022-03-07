@@ -2,6 +2,7 @@ using System;
 using UnityEngine;
 using BepInEx;
 using BepInEx.Configuration;
+using RoR2;
 using RoR2.ContentManagement;
 using R2API;
 using R2API.Utils;
@@ -20,11 +21,12 @@ namespace TPDespair.ZetArtifacts
 	[BepInPlugin(ModGuid, ModName, ModVer)]
 	[BepInDependency(R2API.R2API.PluginGUID)]
 	[R2APISubmoduleDependency(nameof(LanguageAPI), nameof(EliteAPI), nameof(NetworkingAPI))]
+	[BepInDependency("com.arimah.PerfectedLoop", BepInDependency.DependencyFlags.SoftDependency)]
 	[BepInDependency("com.TPDespair.DiluvianArtifact", BepInDependency.DependencyFlags.SoftDependency)]
 
 	public class ZetArtifactsPlugin : BaseUnityPlugin
 	{
-		public const string ModVer = "1.2.4";
+		public const string ModVer = "1.3.0";
 		public const string ModName = "ZetArtifacts";
 		public const string ModGuid = "com.TPDespair.ZetArtifacts";
 
@@ -36,10 +38,10 @@ namespace TPDespair.ZetArtifacts
 		public static ConfigEntry<int> DropifactEnable { get; set; }
 		public static ConfigEntry<bool> DropifactRemoveScrapper { get; set; }
 		public static ConfigEntry<bool> DropifactLunar { get; set; }
+		public static ConfigEntry<bool> DropifactVoid { get; set; }
 		public static ConfigEntry<bool> DropifactUnique { get; set; }
 		public static ConfigEntry<int> LoopifactEnable { get; set; }
 		public static ConfigEntry<int> LoopifactEliteLevel { get; set; }
-		public static ConfigEntry<bool> LoopifactScaleImpale { get; set; }
 		public static ConfigEntry<int> EclifactEnable { get; set; }
 
 
@@ -55,6 +57,11 @@ namespace TPDespair.ZetArtifacts
 			ZetDropifact.Init();
 			ZetLoopifact.Init();
 			ZetEclifact.Init();
+
+			if (LoopifactEnable.Value != 0)
+			{
+				RoR2Application.onLoad += ZetLoopifact.ApplyEarlyEliteProperties;
+			}
 
 			//On.RoR2.Networking.GameNetworkManager.OnClientConnect += (self, user, t) => { };
 		}
@@ -87,6 +94,10 @@ namespace TPDespair.ZetArtifacts
 				"Artifacts", "dropifactLunar", true,
 				"Allow dropping lunar items."
 			);
+			DropifactVoid = Config.Bind(
+				"Artifacts", "dropifactVoid", true,
+				"Allow dropping void items."
+			);
 			DropifactUnique = Config.Bind(
 				"Artifacts", "dropifactUnique", true,
 				"Allow dropping WorldUnique items."
@@ -98,10 +109,6 @@ namespace TPDespair.ZetArtifacts
 			LoopifactEliteLevel = Config.Bind(
 				"Artifacts", "loopifactEliteLevel", 10,
 				"Ambient level for elites to spawn early."
-			);
-			LoopifactScaleImpale = Config.Bind(
-				"Artifacts", "loopifactScaleImpale", true,
-				"Scale impale damage and duration based on ambient level. No effect at lvl 90."
 			);
 			EclifactEnable = Config.Bind(
 				"Artifacts", "eclifactEnable", 1,

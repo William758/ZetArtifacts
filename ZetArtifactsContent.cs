@@ -18,8 +18,11 @@ namespace TPDespair.ZetArtifacts
 		public IEnumerator LoadStaticContentAsync(LoadStaticContentAsyncArgs args)
 		{
 			Artifacts.Create();
+			Elites.Create();
 
 			contentPack.artifactDefs.Add(Artifacts.artifactDefs.ToArray());
+			contentPack.eliteDefs.Add(Elites.eliteDefs.ToArray());
+
 			args.ReportProgress(1f);
 			yield break;
 		}
@@ -109,6 +112,33 @@ namespace TPDespair.ZetArtifacts
 					ZetEclifact.smallIconDeselectedSprite = ZetArtifactsPlugin.CreateSprite(Properties.Resources.zeteclipse_deselected, Color.gray);
 
 					artifactDefs.Add(ZetEclifact);
+				}
+			}
+		}
+
+		public static class Elites
+		{
+			public static EliteDef PoisonEarly;
+			public static EliteDef HauntedEarly;
+			public static EliteDef LunarEarly;
+
+			public static List<EliteDef> eliteDefs = new List<EliteDef>();
+
+			public static void Create()
+			{
+				if (ZetArtifactsPlugin.LoopifactEnable.Value != 0)
+				{
+					PoisonEarly = ScriptableObject.CreateInstance<EliteDef>();
+					eliteDefs.Add(PoisonEarly);
+
+					HauntedEarly = ScriptableObject.CreateInstance<EliteDef>();
+					eliteDefs.Add(HauntedEarly);
+
+					if (ZetArtifactsPlugin.PluginLoaded("com.arimah.PerfectedLoop"))
+					{
+						LunarEarly = ScriptableObject.CreateInstance<EliteDef>();
+						eliteDefs.Add(LunarEarly);
+					}
 				}
 			}
 		}

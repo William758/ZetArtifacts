@@ -20,13 +20,13 @@ namespace TPDespair.ZetArtifacts
 {
 	[BepInPlugin(ModGuid, ModName, ModVer)]
 	[BepInDependency(R2API.R2API.PluginGUID)]
-	[R2APISubmoduleDependency(nameof(LanguageAPI), nameof(EliteAPI), nameof(NetworkingAPI))]
+	[R2APISubmoduleDependency(nameof(LanguageAPI)/*, nameof(EliteAPI)*/, nameof(NetworkingAPI))]
 	[BepInDependency("com.arimah.PerfectedLoop", BepInDependency.DependencyFlags.SoftDependency)]
 	[BepInDependency("com.TPDespair.DiluvianArtifact", BepInDependency.DependencyFlags.SoftDependency)]
 
 	public class ZetArtifactsPlugin : BaseUnityPlugin
 	{
-		public const string ModVer = "1.3.0";
+		public const string ModVer = "1.3.2";
 		public const string ModName = "ZetArtifacts";
 		public const string ModGuid = "com.TPDespair.ZetArtifacts";
 
@@ -57,12 +57,12 @@ namespace TPDespair.ZetArtifacts
 			ZetDropifact.Init();
 			ZetLoopifact.Init();
 			ZetEclifact.Init();
-
+			/*
 			if (LoopifactEnable.Value != 0)
 			{
 				RoR2Application.onLoad += ZetLoopifact.ApplyEarlyEliteProperties;
 			}
-
+			*/
 			//On.RoR2.Networking.GameNetworkManager.OnClientConnect += (self, user, t) => { };
 		}
 

@@ -20,6 +20,10 @@ Use r2modman or place inside of Risk of Rain 2/Bepinex/Plugins/
 
 ## Changelog:
 
+v1.3.2 - EclipseArtifacts compatibility.
+
+v1.3.1 - Disable Escalation elites until EliteAPI is fixed.
+
 v1.3.0 - Updated for latest game version. Fix Safer Spaces cooldown buff handling. Multitudes Fix increases MaxMonsterSpawnCount for CombatShrines.
 
 v1.2.4 - Config to disable dropping WorldUnique items. Config to remove scrappers while using Artifact of Tossing. Prevent scrapping ArtifactKey. Null-check impaleDotIndexField.

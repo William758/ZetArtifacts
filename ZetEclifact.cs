@@ -26,18 +26,37 @@ namespace TPDespair.ZetArtifacts
 
 
 
+		private static void EnableEffects()
+		{
+			IL.RoR2.CharacterMaster.OnBodyStart += Eclipse1Hook;
+			IL.RoR2.HoldoutZoneController.FixedUpdate += Eclipse2Hook;
+			IL.RoR2.GlobalEventManager.OnCharacterHitGroundServer += Eclipse3Hook;
+			IL.RoR2.CharacterBody.RecalculateStats += Eclipse4Hook;
+			IL.RoR2.HealthComponent.Heal += Eclipse5Hook;
+			IL.RoR2.DeathRewards.OnKilledServer += Eclipse6Hook;
+			IL.RoR2.CharacterBody.RecalculateStats += Eclipse7Hook;
+			IL.RoR2.HealthComponent.TakeDamage += Eclipse8Hook;
+		}
+
+		private static void DisableEffects()
+		{
+			IL.RoR2.CharacterMaster.OnBodyStart -= Eclipse1Hook;
+			IL.RoR2.HoldoutZoneController.FixedUpdate -= Eclipse2Hook;
+			IL.RoR2.GlobalEventManager.OnCharacterHitGroundServer -= Eclipse3Hook;
+			IL.RoR2.CharacterBody.RecalculateStats -= Eclipse4Hook;
+			IL.RoR2.HealthComponent.Heal -= Eclipse5Hook;
+			IL.RoR2.DeathRewards.OnKilledServer -= Eclipse6Hook;
+			IL.RoR2.CharacterBody.RecalculateStats -= Eclipse7Hook;
+			IL.RoR2.HealthComponent.TakeDamage -= Eclipse8Hook;
+		}
+
+
+
 		private static void OnArtifactEnabled(RunArtifactManager runArtifactManager, ArtifactDef artifactDef)
 		{
 			if (artifactDef == ZetArtifactsContent.Artifacts.ZetEclifact)
 			{
-				IL.RoR2.CharacterMaster.OnBodyStart += Eclipse1Hook;
-				IL.RoR2.HoldoutZoneController.FixedUpdate += Eclipse2Hook;
-				IL.RoR2.GlobalEventManager.OnCharacterHitGroundServer += Eclipse3Hook;
-				IL.RoR2.CharacterBody.RecalculateStats += Eclipse4Hook;
-				IL.RoR2.HealthComponent.Heal += Eclipse5Hook;
-				IL.RoR2.DeathRewards.OnKilledServer += Eclipse6Hook;
-				IL.RoR2.CharacterBody.RecalculateStats += Eclipse7Hook;
-				IL.RoR2.HealthComponent.TakeDamage += Eclipse8Hook;
+				EnableEffects();
 			}
 		}
 
@@ -45,14 +64,7 @@ namespace TPDespair.ZetArtifacts
 		{
 			if (artifactDef == ZetArtifactsContent.Artifacts.ZetEclifact)
 			{
-				IL.RoR2.CharacterMaster.OnBodyStart -= Eclipse1Hook;
-				IL.RoR2.HoldoutZoneController.FixedUpdate -= Eclipse2Hook;
-				IL.RoR2.GlobalEventManager.OnCharacterHitGroundServer -= Eclipse3Hook;
-				IL.RoR2.CharacterBody.RecalculateStats -= Eclipse4Hook;
-				IL.RoR2.HealthComponent.Heal -= Eclipse5Hook;
-				IL.RoR2.DeathRewards.OnKilledServer -= Eclipse6Hook;
-				IL.RoR2.CharacterBody.RecalculateStats -= Eclipse7Hook;
-				IL.RoR2.HealthComponent.TakeDamage -= Eclipse8Hook;
+				DisableEffects();
 			}
 		}
 
@@ -67,8 +79,15 @@ namespace TPDespair.ZetArtifacts
 			ZetArtifactsPlugin.RegisterLanguageToken("ARTIFACT_ZETECLIFACT_NAME", "Artifact of the Eclipse");
 			ZetArtifactsPlugin.RegisterLanguageToken("ARTIFACT_ZETECLIFACT_DESC", "Enables all Eclipse modifiers.\n\n<style=cStack>>Ally Starting Health: <style=cDeath>-50%</style>\n>Teleporter Radius: <style=cDeath>-50%</style>\n>Ally Fall Damage: <style=cDeath>+100% and lethal</style>\n>Enemy Speed: <style=cDeath>+40%</style>\n>Ally Healing: <style=cDeath>-50%</style>\n>Enemy Gold Drops: <style=cDeath>-20%</style>\n>Enemy Cooldowns: <style=cDeath>-50%</style>\n>Allies receive <style=cDeath>permanent damage</style></style>");
 
-			RunArtifactManager.onArtifactEnabledGlobal += OnArtifactEnabled;
-			RunArtifactManager.onArtifactDisabledGlobal += OnArtifactDisabled;
+			if (state == 1)
+			{
+				RunArtifactManager.onArtifactEnabledGlobal += OnArtifactEnabled;
+				RunArtifactManager.onArtifactDisabledGlobal += OnArtifactDisabled;
+			}
+			else
+			{
+				EnableEffects();
+			}
 		}
 
 

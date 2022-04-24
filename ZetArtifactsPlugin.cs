@@ -20,13 +20,13 @@ namespace TPDespair.ZetArtifacts
 {
 	[BepInPlugin(ModGuid, ModName, ModVer)]
 	[BepInDependency(R2API.R2API.PluginGUID)]
-	[R2APISubmoduleDependency(nameof(LanguageAPI)/*, nameof(EliteAPI)*/, nameof(NetworkingAPI))]
+	[R2APISubmoduleDependency(nameof(LanguageAPI), nameof(EliteAPI), nameof(NetworkingAPI))]
 	[BepInDependency("com.arimah.PerfectedLoop", BepInDependency.DependencyFlags.SoftDependency)]
 	[BepInDependency("com.TPDespair.DiluvianArtifact", BepInDependency.DependencyFlags.SoftDependency)]
 
 	public class ZetArtifactsPlugin : BaseUnityPlugin
 	{
-		public const string ModVer = "1.3.2";
+		public const string ModVer = "1.3.4";
 		public const string ModName = "ZetArtifacts";
 		public const string ModGuid = "com.TPDespair.ZetArtifacts";
 
@@ -36,6 +36,7 @@ namespace TPDespair.ZetArtifacts
 		public static ConfigEntry<int> MultifactEnable { get; set; }
 		public static ConfigEntry<int> MultifactMultiplier { get; set; }
 		public static ConfigEntry<int> DropifactEnable { get; set; }
+		public static ConfigEntry<bool> DropifactBypassGround { get; set; }
 		public static ConfigEntry<bool> DropifactRemoveScrapper { get; set; }
 		public static ConfigEntry<bool> DropifactLunar { get; set; }
 		public static ConfigEntry<bool> DropifactVoid { get; set; }
@@ -57,12 +58,12 @@ namespace TPDespair.ZetArtifacts
 			ZetDropifact.Init();
 			ZetLoopifact.Init();
 			ZetEclifact.Init();
-			/*
+			
 			if (LoopifactEnable.Value != 0)
 			{
 				RoR2Application.onLoad += ZetLoopifact.ApplyEarlyEliteProperties;
 			}
-			*/
+			
 			//On.RoR2.Networking.GameNetworkManager.OnClientConnect += (self, user, t) => { };
 		}
 
@@ -85,6 +86,10 @@ namespace TPDespair.ZetArtifacts
 			DropifactEnable = Config.Bind(
 				"Artifacts", "dropifactEnable", 1,
 				"Artifact of Tossing. 0 = Disabled, 1 = Artifact Available, 2 = Always Active"
+			);
+			DropifactBypassGround = Config.Bind(
+				"Artifacts", "dropifactBypassGround", false,
+				"Drop items directly on contact with the ground. Bypass onDropletHitGroundServer event, which includes Artifact of Command."
 			);
 			DropifactRemoveScrapper = Config.Bind(
 				"Artifacts", "dropifactRemoveScrapper", false,

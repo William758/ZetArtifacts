@@ -20,6 +20,10 @@ Use r2modman or place inside of Risk of Rain 2/Bepinex/Plugins/
 
 ## Changelog:
 
+v1.3.4 - Config to prevent command essence when dropping items. Drop items towards look direction.
+
+v1.3.3 - Fixed for latest update. Re-enabled Escalation early elites.
+
 v1.3.2 - EclipseArtifacts compatibility.
 
 v1.3.1 - Disable Escalation elites until EliteAPI is fixed.

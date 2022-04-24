@@ -2,7 +2,7 @@ using MonoMod.Cil;
 using RoR2;
 using System;
 using UnityEngine;
-//using R2API;
+using R2API;
 using System.Collections.Generic;
 
 namespace TPDespair.ZetArtifacts
@@ -44,19 +44,19 @@ namespace TPDespair.ZetArtifacts
 			if (state < 1) return;
 
 			ZetArtifactsPlugin.RegisterLanguageToken("ARTIFACT_ZETLOOPIFACT_NAME", "Artifact of Escalation");
-			//ZetArtifactsPlugin.RegisterLanguageToken("ARTIFACT_ZETLOOPIFACT_DESC", "Monster and interactable types can appear earlier than usual. Post-loop Elites begin to appear at monster level " + ZetArtifactsPlugin.LoopifactEliteLevel.Value + ".");
-			ZetArtifactsPlugin.RegisterLanguageToken("ARTIFACT_ZETLOOPIFACT_DESC", "Monster and interactable types can appear earlier than usual.");
+			ZetArtifactsPlugin.RegisterLanguageToken("ARTIFACT_ZETLOOPIFACT_DESC", "Monster and interactable types can appear earlier than usual. Post-loop Elites begin to appear at monster level " + ZetArtifactsPlugin.LoopifactEliteLevel.Value + ".");
+			//ZetArtifactsPlugin.RegisterLanguageToken("ARTIFACT_ZETLOOPIFACT_DESC", "Monster and interactable types can appear earlier than usual.");
 
-			//SceneDirector.onPostPopulateSceneServer += OnScenePopulated;
-			//SceneExitController.onBeginExit += OnSceneExit;
+			SceneDirector.onPostPopulateSceneServer += OnScenePopulated;
+			SceneExitController.onBeginExit += OnSceneExit;
 
 			MinimumStageHook();
 			DirectorMoneyHook();
-			//AddEarlyEliteDef();
+			AddEarlyEliteDef();
 		}
 
 
-		/*
+		
 		private static void OnScenePopulated(SceneDirector sceneDirector)
 		{
 			disableEarlyEliteDef = true;
@@ -74,7 +74,7 @@ namespace TPDespair.ZetArtifacts
 		{
 			disableEarlyEliteDef = true;
 		}
-		*/
+		
 		/*
 		private static void FindImpaleDotIndex()
 		{
@@ -282,13 +282,13 @@ namespace TPDespair.ZetArtifacts
 			{
 				costMultiplier = Mathf.LerpUnclamped(1f, CombatDirector.baseEliteCostMultiplier * 6f, 0.35f),
 				eliteTypes = new EliteDef[] { },
-				isAvailable = ((SpawnCard.EliteRules rules) => IsEarlyEliteDefAvailable(rules)),
+				isAvailable = (SpawnCard.EliteRules rules) => IsEarlyEliteDefAvailable(rules),
 				canSelectWithoutAvailableEliteDef = false
 			};
-			/*
+			
 			Debug.LogWarning("ZetArtifact [ZetLoopifact] - AddCustomEliteTier : EarlyEliteTierDef");
 			EliteAPI.AddCustomEliteTier(earlyEliteDef);
-			*/
+			
 		}
 
 		private static bool IsEarlyEliteDefAvailable(SpawnCard.EliteRules rules)

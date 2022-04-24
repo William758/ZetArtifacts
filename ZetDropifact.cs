@@ -25,6 +25,11 @@ namespace TPDespair.ZetArtifacts
 		}
 	}
 
+	public class ZetDropMarker : MonoBehaviour
+	{
+		
+	}
+
 
 
 	public class ZetDropReply : INetMessage
@@ -62,12 +67,14 @@ namespace TPDespair.ZetArtifacts
 		public CharacterBody Body;
 		public int DropType;
 		public int Index;
+		public float Angle;
 
 		public void Serialize(NetworkWriter writer)
 		{
 			writer.Write(Body.gameObject);
 			writer.Write(DropType);
 			writer.Write(Index);
+			writer.Write(Angle);
 		}
 
 		public void Deserialize(NetworkReader reader)
@@ -75,6 +82,7 @@ namespace TPDespair.ZetArtifacts
 			Body = reader.ReadGameObject().GetComponent<CharacterBody>();
 			DropType = reader.ReadInt32();
 			Index = reader.ReadInt32();
+			Angle = reader.ReadSingle();
 		}
 
 		public void OnReceived()
@@ -140,6 +148,8 @@ namespace TPDespair.ZetArtifacts
 			ItemIconHook();
 			EquipmentIconHook();
 
+			MarkedDropletBypassHook();
+
 			PreventVoidBearBuffBug();
 			appliedVoidBearFix = true;
 
@@ -162,6 +172,8 @@ namespace TPDespair.ZetArtifacts
 
 			bool scrap = Input.GetKey(KeyCode.LeftAlt) && eventData.button == PointerEventData.InputButton.Right;
 
+			float aimAngle = GetAimAngle(body);
+
 			if (!NetworkServer.active)
 			{
 				// Client, send message
@@ -173,7 +185,7 @@ namespace TPDespair.ZetArtifacts
 
 					if (!ValidDropRequest(equipIndex, scrap)) return;
 
-					dropMessage = new ZetDropRequest { Body = body, DropType = 2, Index = (int)equipIndex };
+					dropMessage = new ZetDropRequest { Body = body, DropType = 2, Index = (int)equipIndex, Angle = aimAngle };
 				}
 				else
 				{
@@ -181,7 +193,7 @@ namespace TPDespair.ZetArtifacts
 
 					if (!ValidDropRequest(itemIndex, scrap)) return;
 
-					dropMessage = new ZetDropRequest { Body = body, DropType = scrap ? 1 : 0, Index = (int)itemIndex };
+					dropMessage = new ZetDropRequest { Body = body, DropType = scrap ? 1 : 0, Index = (int)itemIndex, Angle = aimAngle };
 				}
 
 				// used to identify self when we recieve drop confirmation to display notification
@@ -198,7 +210,7 @@ namespace TPDespair.ZetArtifacts
 
 					if (!ValidDropRequest(equipIndex, scrap)) return;
 
-					if (DropItem(body, inventory, equipIndex)) CreateNotification(body, equipIndex);
+					if (DropItem(body, inventory, equipIndex, aimAngle)) CreateNotification(body, equipIndex);
 				}
 				else
 				{
@@ -206,7 +218,7 @@ namespace TPDespair.ZetArtifacts
 
 					if (!ValidDropRequest(itemIndex, scrap)) return;
 
-					if (DropItem(body, inventory, itemIndex, scrap)) CreateNotification(body, itemIndex, scrap);
+					if (DropItem(body, inventory, itemIndex, aimAngle, scrap)) CreateNotification(body, itemIndex, scrap);
 				}
 			}
 		}
@@ -253,7 +265,7 @@ namespace TPDespair.ZetArtifacts
 
 				if (!ValidDropRequest(equipIndex, false)) return false;
 
-				if (DropItem(body, inventory, equipIndex)) return true;
+				if (DropItem(body, inventory, equipIndex, dropRequest.Angle)) return true;
 			}
 			else
 			{
@@ -263,7 +275,7 @@ namespace TPDespair.ZetArtifacts
 
 				if (!ValidDropRequest(itemIndex, scrap)) return false;
 
-				if (DropItem(body, inventory, itemIndex, scrap)) return true;
+				if (DropItem(body, inventory, itemIndex, dropRequest.Angle, scrap)) return true;
 			}
 
 			return false;
@@ -339,18 +351,18 @@ namespace TPDespair.ZetArtifacts
 
 
 
-		private static bool DropItem(CharacterBody body, Inventory inventory, EquipmentIndex index)
+		private static bool DropItem(CharacterBody body, Inventory inventory, EquipmentIndex index, float angle)
 		{
 			if (inventory.GetEquipmentIndex() != index) return false;
 
 			inventory.SetEquipmentIndex(EquipmentIndex.None);
 
-			CreateDroplet(index, body.transform.position);
+			CreateDroplet(index, body.transform.position, angle);
 
 			return true;
 		}
 
-		private static bool DropItem(CharacterBody body, Inventory inventory, ItemIndex index, bool scrap)
+		private static bool DropItem(CharacterBody body, Inventory inventory, ItemIndex index, float angle, bool scrap)
 		{
 			ItemIndex dropIndex = index;
 
@@ -384,26 +396,65 @@ namespace TPDespair.ZetArtifacts
 
 			inventory.RemoveItem(index, 1);
 
-			CreateDroplet(dropIndex, body.transform.position);
+			CreateDroplet(dropIndex, body.transform.position, angle);
 
 			return true;
 		}
 
 
 
-		private static void CreateDroplet(EquipmentIndex index, Vector3 pos)
+		private static float GetAimAngle(CharacterBody body)
 		{
-			CreateDroplet(PickupCatalog.FindPickupIndex(index), pos);
+			InputBankTest input = body.inputBank;
+			if (input)
+			{
+				Vector3 lookDirection = input.aimDirection;
+				Vector3 flatLookDirection = new Vector3(lookDirection.x, 0f, lookDirection.z);
+				return Vector3.SignedAngle(Vector3.forward, flatLookDirection, Vector3.up);
+			}
+
+			return 0f;
 		}
 
-		private static void CreateDroplet(ItemIndex index, Vector3 pos)
+
+
+		private static void CreateDroplet(EquipmentIndex index, Vector3 pos, float angle)
 		{
-			CreateDroplet(PickupCatalog.FindPickupIndex(index), pos);
+			CreateDroplet(PickupCatalog.FindPickupIndex(index), pos, angle);
 		}
 
-		private static void CreateDroplet(PickupIndex index, Vector3 pos)
+		private static void CreateDroplet(ItemIndex index, Vector3 pos, float angle)
 		{
-			PickupDropletController.CreatePickupDroplet(index, pos, Vector3.up * 20f + Vector3.right * 10f);
+			CreateDroplet(PickupCatalog.FindPickupIndex(index), pos, angle);
+		}
+
+		private static void CreateDroplet(PickupIndex index, Vector3 pos, float angle)
+		{
+			CreateMarkedPickupDroplet(index, pos, Vector3.up * 20f + (Quaternion.AngleAxis(angle, Vector3.up) * (Vector3.forward * 10f)));
+		}
+
+
+
+		private static void CreateMarkedPickupDroplet(PickupIndex pickupIndex, Vector3 position, Vector3 velocity)
+		{
+			GenericPickupController.CreatePickupInfo pickupInfo = new GenericPickupController.CreatePickupInfo { rotation = Quaternion.identity, pickupIndex = pickupIndex };
+
+			GameObject droplet = UnityEngine.Object.Instantiate(PickupDropletController.pickupDropletPrefab, position, Quaternion.identity);
+
+			PickupDropletController controller = droplet.GetComponent<PickupDropletController>();
+			if (controller)
+			{
+				controller.createPickupInfo = pickupInfo;
+				controller.NetworkpickupIndex = pickupInfo.pickupIndex;
+			}
+
+			Rigidbody rigidBody = droplet.GetComponent<Rigidbody>();
+			rigidBody.velocity = velocity;
+			rigidBody.AddTorque(UnityEngine.Random.Range(150f, 120f) * UnityEngine.Random.onUnitSphere);
+
+			droplet.AddComponent<ZetDropMarker>();
+
+			NetworkServer.Spawn(droplet);
 		}
 
 
@@ -515,6 +566,34 @@ namespace TPDespair.ZetArtifacts
 
 
 
+		private static void MarkedDropletBypassHook()
+		{
+			On.RoR2.PickupDropletController.OnCollisionEnter += (orig, self, collision) =>
+			{
+				if (NetworkServer.active && self.alive)
+				{
+					if (self.GetComponent<ZetDropMarker>())
+					{
+						if (ZetArtifactsPlugin.DropifactBypassGround.Value)
+						{
+							self.alive = false;
+							self.createPickupInfo.position = self.transform.position;
+
+							GenericPickupController.CreatePickup(self.createPickupInfo);
+
+							UnityEngine.Object.Destroy(self.gameObject);
+
+							return;
+						}
+					}
+				}
+
+				orig(self, collision);
+			};
+		}
+
+
+
 		private static void PreventVoidBearBuffBug()
 		{
 			//On.RoR2.CharacterMaster.OnBodyStart += CharacterMaster_OnBodyStart;
@@ -522,21 +601,7 @@ namespace TPDespair.ZetArtifacts
 			On.RoR2.CharacterBody.AddTimedBuff_BuffDef_float += CharacterBody_AddTimedBuff_BuffDef_float;
 			On.RoR2.CharacterBody.RemoveBuff_BuffIndex += CharacterBody_RemoveBuff_BuffIndex;
 		}
-		/*
-		private static void CharacterMaster_OnBodyStart(On.RoR2.CharacterMaster.orig_OnBodyStart orig, CharacterMaster self, CharacterBody body)
-		{
-			orig(self, body);
 
-			if (NetworkServer.active)
-			{
-				Inventory inventory = self.inventory;
-				if (inventory && body.isPlayerControlled)
-				{
-					inventory.GiveItem(DLC1Content.Items.BearVoid);
-				}
-			}
-		}
-		*/
 		private static void CharacterBody_AddTimedBuff_BuffDef_float(On.RoR2.CharacterBody.orig_AddTimedBuff_BuffDef_float orig, CharacterBody self, BuffDef buffDef, float duration)
 		{
 			if (NetworkServer.active)
@@ -580,6 +645,5 @@ namespace TPDespair.ZetArtifacts
 			GameObject prefab = card.spawnCard.prefab;
 			return !prefab.GetComponent<ScrapperController>();
 		}
-
 	}
 }

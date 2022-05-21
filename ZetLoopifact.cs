@@ -1,4 +1,4 @@
-using MonoMod.Cil;
+﻿using MonoMod.Cil;
 using RoR2;
 using System;
 using UnityEngine;
@@ -11,11 +11,6 @@ namespace TPDespair.ZetArtifacts
 	{
 		public static CombatDirector.EliteTierDef earlyEliteDef;
 		public static bool disableEarlyEliteDef = true;
-
-		//public static EliteDef impaleElite;
-		//private static bool attemptedFindImpaleDotIndex = false;
-		//public static DotController.DotIndex impaleDotIndex = DotController.DotIndex.None;
-		//public static bool impaleReduction = true;
 
 
 
@@ -50,6 +45,8 @@ namespace TPDespair.ZetArtifacts
 			SceneDirector.onPostPopulateSceneServer += OnScenePopulated;
 			SceneExitController.onBeginExit += OnSceneExit;
 
+			On.RoR2.EliteCatalog.Init += EliteCatalogInitHook;
+
 			MinimumStageHook();
 			DirectorMoneyHook();
 			AddEarlyEliteDef();
@@ -74,50 +71,7 @@ namespace TPDespair.ZetArtifacts
 		{
 			disableEarlyEliteDef = true;
 		}
-		
-		/*
-		private static void FindImpaleDotIndex()
-		{
-			if (!ZetArtifactsPlugin.PluginLoaded("com.themysticsword.elitevariety")) return;
 
-			if (impaleDotIndex == DotController.DotIndex.None && !attemptedFindImpaleDotIndex)
-			{
-				BaseUnityPlugin Plugin = BepInEx.Bootstrap.Chainloader.PluginInfos["com.themysticsword.elitevariety"].Instance;
-				Assembly PluginAssembly = Assembly.GetAssembly(Plugin.GetType());
-
-				if (PluginAssembly != null)
-				{
-					BindingFlags Flags = BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
-
-					Type type = Type.GetType("EliteVariety.Buffs.ImpPlaneImpaled, " + PluginAssembly.FullName, false);
-					if (type != null)
-					{
-						FieldInfo indexField = type.GetField("dotIndex", Flags);
-						if (indexField != null)
-						{
-							impaleDotIndex = (DotController.DotIndex)indexField.GetValue(type);
-
-							Debug.LogWarning("ZetArtifact [ZetLoopifact] - Impale DotIndex : " + impaleDotIndex);
-						}
-						else
-						{
-							Debug.LogWarning("ZetArtifact [ZetLoopifact] - Could Not Find Field : ImpPlaneImpaled.dotIndex");
-						}
-					}
-					else
-					{
-						Debug.LogWarning("ZetArtifact [ZetLoopifact] - Could Not Find Type : EliteVariety.Buffs.ImpPlaneImpaled");
-					}
-				}
-				else
-				{
-					Debug.LogWarning("ZetArtifact [ZetLoopifact] - Could Not Find EliteVariety Assembly");
-				}
-			}
-
-			attemptedFindImpaleDotIndex = true;
-		}
-		*/
 		private static void RebuildEliteTypeArray()
 		{
 			if (earlyEliteDef != null)
@@ -135,62 +89,60 @@ namespace TPDespair.ZetArtifacts
 				{
 					eliteDefs.Add(ZetArtifactsContent.Elites.LunarEarly);
 				}
-				/*
-				EquipmentIndex equipIndex;
-				EliteDef eliteDef;
-				
-				if (ZetArtifactsPlugin.PluginLoaded("com.themysticsword.elitevariety"))
-				{
-					if (impaleElite == null)
-					{
-						equipIndex = EquipmentCatalog.FindEquipmentIndex("EliteVariety_AffixImpPlane");
-						if (equipIndex != EquipmentIndex.None)
-						{
-							eliteDef = GetEquipmentEliteDef(EquipmentCatalog.GetEquipmentDef(equipIndex));
-							if (eliteDef != null) impaleElite = eliteDef;
-						}
-					}
 
-					if (impaleElite != null) eliteDefs.Add(impaleElite);
-				}
-				*/
 				if (Enabled) Debug.LogWarning("ZetArtifact [ZetLoopifact] - Rebuild EarlyEliteTypeArray : " + eliteDefs.Count);
 				earlyEliteDef.eliteTypes = eliteDefs.ToArray();
 			}
 		}
-		/*
-		public static EliteDef GetEquipmentEliteDef(EquipmentDef equipDef)
+
+
+
+		private static void EliteCatalogInitHook(On.RoR2.EliteCatalog.orig_Init orig)
 		{
-			if (equipDef == null) return null;
-			if (equipDef.passiveBuffDef == null) return null;
-			return equipDef.passiveBuffDef.eliteDef;
+			orig();
+
+			ApplyEarlyEliteProperties();
 		}
-		*/
 
-
-		internal static void ApplyEarlyEliteProperties()
+		private static void ApplyEarlyEliteProperties()
 		{
 			EliteDef t2Elite = RoR2Content.Elites.Poison;
 
+			CopyEliteEquipment(ZetArtifactsContent.Elites.PoisonEarly, RoR2Content.Elites.Poison);
 			CopyBasicAttributes(ZetArtifactsContent.Elites.PoisonEarly, RoR2Content.Elites.Poison);
 			ApplyStatBoosts(ZetArtifactsContent.Elites.PoisonEarly, t2Elite);
 
+			CopyEliteEquipment(ZetArtifactsContent.Elites.HauntedEarly, RoR2Content.Elites.Haunted);
 			CopyBasicAttributes(ZetArtifactsContent.Elites.HauntedEarly, RoR2Content.Elites.Haunted);
 			ApplyStatBoosts(ZetArtifactsContent.Elites.HauntedEarly, t2Elite);
 
 			if (ZetArtifactsPlugin.PluginLoaded("com.arimah.PerfectedLoop"))
 			{
+				CopyEliteEquipment(ZetArtifactsContent.Elites.LunarEarly, RoR2Content.Elites.Lunar);
 				CopyBasicAttributes(ZetArtifactsContent.Elites.LunarEarly, RoR2Content.Elites.Lunar);
 				ApplyStatBoosts(ZetArtifactsContent.Elites.LunarEarly, t2Elite);
+
+				Debug.LogWarning("ZetArtifact [ZetLoopifact] - Early Perfected Elites");
 			}
 
 			Debug.LogWarning("ZetArtifact [ZetLoopifact] - ApplyEarlyEliteProperties");
 		}
 
+		private static void CopyEliteEquipment(EliteDef target, EliteDef copyFrom)
+		{
+			if (copyFrom.eliteEquipmentDef != null)
+			{
+				target.eliteEquipmentDef = copyFrom.eliteEquipmentDef;
+			}
+			else
+			{
+				Debug.LogWarning("ZetArtifact [ZetLoopifact] - CopyEliteEquipment failed to copy from : " + copyFrom);
+			}
+		}
+
 		private static void CopyBasicAttributes(EliteDef target, EliteDef copyFrom)
 		{
 			target.modifierToken = copyFrom.modifierToken;
-			target.eliteEquipmentDef = copyFrom.eliteEquipmentDef;
 			target.color = copyFrom.color;
 			target.shaderEliteRampIndex = copyFrom.shaderEliteRampIndex;
 		}
@@ -264,20 +216,6 @@ namespace TPDespair.ZetArtifacts
 
 		private static void AddEarlyEliteDef()
 		{
-			/*
-			CombatDirector.EliteTierDef[] combatDirectorEliteTiers = EliteAPI.GetCombatDirectorEliteTiers();
-			CombatDirector.EliteTierDef eliteTierDef = combatDirectorEliteTiers.FirstOrDefault((CombatDirector.EliteTierDef tier) => tier.eliteTypes.Contains(RoR2Content.Elites.Poison) && tier.eliteTypes.Contains(RoR2Content.Elites.Haunted));
-
-			if (eliteTierDef == null)
-			{
-				Debug.LogWarning("ZetArtifact [ZetLoopifact] - Could not find loop elites, Aborting!");
-				return;
-			}
-
-			int index = Array.IndexOf(combatDirectorEliteTiers, eliteTierDef);
-
-			Debug.LogWarning("ZetArtifact [ZetLoopifact] - DefineEliteTier : EarlyEliteDef");
-			*/
 			earlyEliteDef = new CombatDirector.EliteTierDef
 			{
 				costMultiplier = Mathf.LerpUnclamped(1f, CombatDirector.baseEliteCostMultiplier * 6f, 0.35f),

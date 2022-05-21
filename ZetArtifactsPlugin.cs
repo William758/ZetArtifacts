@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using UnityEngine;
 using BepInEx;
 using BepInEx.Configuration;
@@ -26,7 +26,7 @@ namespace TPDespair.ZetArtifacts
 
 	public class ZetArtifactsPlugin : BaseUnityPlugin
 	{
-		public const string ModVer = "1.3.4";
+		public const string ModVer = "1.3.5";
 		public const string ModName = "ZetArtifacts";
 		public const string ModGuid = "com.TPDespair.ZetArtifacts";
 
@@ -58,11 +58,6 @@ namespace TPDespair.ZetArtifacts
 			ZetDropifact.Init();
 			ZetLoopifact.Init();
 			ZetEclifact.Init();
-			
-			if (LoopifactEnable.Value != 0)
-			{
-				RoR2Application.onLoad += ZetLoopifact.ApplyEarlyEliteProperties;
-			}
 			
 			//On.RoR2.Networking.GameNetworkManager.OnClientConnect += (self, user, t) => { };
 		}

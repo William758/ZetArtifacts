@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.EventSystems;
@@ -27,7 +27,7 @@ namespace TPDespair.ZetArtifacts
 
 	public class ZetDropMarker : MonoBehaviour
 	{
-		
+		// used to check if droplet should not be affected by artifact of command
 	}
 
 
@@ -106,27 +106,26 @@ namespace TPDespair.ZetArtifacts
 	{
 		public static CharacterBody LocalBody;
 
-		public static ItemIndex LunarScrapIndex = ItemIndex.None;
 		public static ItemIndex ArtifactKeyIndex = ItemIndex.None;
+		public static ItemIndex LunarScrapIndex = ItemIndex.None;
+
+		public static ItemTier LunarVoidTier = ItemTier.AssignedAtRuntime;
 
 		public static bool appliedVoidBearFix = false;
 
 
 
-		private static int state = 0;
+		private static int State = 0;
+		internal static ArtifactDef ArtifactDef;
 
 		public static bool Enabled
 		{
 			get
 			{
-				if (state < 1) return false;
-				else if (state > 1) return true;
-				else
-				{
-					if (RunArtifactManager.instance && RunArtifactManager.instance.IsArtifactEnabled(ZetArtifactsContent.Artifacts.ZetDropifact)) return true;
+				if (State < 1) return false;
+				else if (State > 1) return true;
 
-					return false;
-				}
+				return ZetArtifactsPlugin.ArtifactEnabled(ArtifactDef);
 			}
 		}
 
@@ -134,26 +133,52 @@ namespace TPDespair.ZetArtifacts
 
 		internal static void Init()
 		{
-			state = ZetArtifactsPlugin.DropifactEnable.Value;
-			if (state < 1) return;
+			State = ZetArtifactsPlugin.DropifactEnable.Value;
 
-			ZetArtifactsPlugin.RegisterLanguageToken("ARTIFACT_ZETDROPIFACT_NAME", "Artifact of Tossing");
-			ZetArtifactsPlugin.RegisterLanguageToken("ARTIFACT_ZETDROPIFACT_DESC", "Allows players to drop and scrap items.\n\n<style=cStack>LeftAlt + RMB to scrap</style>");
+			if (State < 1) return;
+
+			ZetArtifactsPlugin.RegisterToken("ARTIFACT_ZETDROPIFACT_NAME", "Artifact of Tossing");
+			ZetArtifactsPlugin.RegisterToken("ARTIFACT_ZETDROPIFACT_DESC", "Allows players to drop and scrap items.\n\n<style=cStack>LeftAlt + RMB to scrap</style>");
 
 			NetworkingAPI.RegisterMessageType<ZetDropReply>();
 			NetworkingAPI.RegisterMessageType<ZetDropRequest>();
-
-			ItemCatalog.availability.CallWhenAvailable(FindIndexes);
 
 			ItemIconHook();
 			EquipmentIconHook();
 
 			MarkedDropletBypassHook();
 
-			PreventVoidBearBuffBug();
-			appliedVoidBearFix = true;
-
 			SceneDirector.onGenerateInteractableCardSelection += RemoveScrapperCard;
+		}
+
+		internal static void LateSetup()
+		{
+			if (State < 1) return;
+
+			ItemIndex itemIndex = ItemCatalog.FindItemIndex("ArtifactKey");
+			if (itemIndex != ItemIndex.None)
+			{
+				ArtifactKeyIndex = itemIndex;
+			}
+			itemIndex = ItemCatalog.FindItemIndex("ScrapLunar");
+			if (itemIndex != ItemIndex.None)
+			{
+				LunarScrapIndex = itemIndex;
+			}
+
+			ItemTierDef itemTierDef = ItemTierCatalog.FindTierDef("VoidLunarTierDef");
+			if (itemTierDef)
+			{
+				LunarVoidTier = itemTierDef.tier;
+			}
+
+			if (!ZetArtifactsPlugin.PluginLoaded("com.TPDespair.ZetAspects"))
+			{
+				On.RoR2.CharacterBody.AddTimedBuff_BuffDef_float += VoidBearFix_AddTimedBuff;
+				On.RoR2.CharacterBody.RemoveBuff_BuffIndex += VoidBearFix_RemoveBuff;
+
+				appliedVoidBearFix = true;
+			}
 		}
 
 
@@ -306,7 +331,7 @@ namespace TPDespair.ZetArtifacts
 
 			if (itemDef.tier == ItemTier.NoTier) return false;
 
-			if (!ZetArtifactsPlugin.DropifactLunar.Value && itemDef.tier == ItemTier.Lunar) return false;
+			if (!ZetArtifactsPlugin.DropifactLunar.Value && IsLunarTier(itemDef.tier)) return false;
 			if (!ZetArtifactsPlugin.DropifactVoid.Value && IsVoidTier(itemDef.tier)) return false;
 			if (!ZetArtifactsPlugin.DropifactUnique.Value && itemDef.ContainsTag(ItemTag.WorldUnique)) return false;
 
@@ -319,6 +344,8 @@ namespace TPDespair.ZetArtifacts
 
 		private static bool IsScrapable(ItemTier tier)
 		{
+			if (LunarVoidTier != ItemTier.AssignedAtRuntime && tier == LunarVoidTier) return false;
+
 			switch (tier)
 			{
 				case ItemTier.Tier1:
@@ -339,12 +366,23 @@ namespace TPDespair.ZetArtifacts
 			}
 		}
 
+		private static bool IsLunarTier(ItemTier tier)
+		{
+			if (tier == ItemTier.Lunar) return true;
+
+			if (LunarVoidTier != ItemTier.AssignedAtRuntime && tier == LunarVoidTier) return true;
+
+			return false;
+		}
+
 		private static bool IsVoidTier(ItemTier tier)
 		{
 			if (tier == ItemTier.VoidTier1) return true;
 			if (tier == ItemTier.VoidTier2) return true;
 			if (tier == ItemTier.VoidTier3) return true;
 			if (tier == ItemTier.VoidBoss) return true;
+
+			if (LunarVoidTier != ItemTier.AssignedAtRuntime && tier == LunarVoidTier) return true;
 
 			return false;
 		}
@@ -497,16 +535,6 @@ namespace TPDespair.ZetArtifacts
 
 
 
-		private static void FindIndexes()
-		{
-			ItemIndex index = ItemCatalog.FindItemIndex("ScrapLunar");
-			if (index != ItemIndex.None) LunarScrapIndex = index;
-			index = ItemCatalog.FindItemIndex("ArtifactKey");
-			if (index != ItemIndex.None) ArtifactKeyIndex = index;
-		}
-
-
-
 		private static void ItemIconHook()
 		{
 			IL.RoR2.UI.ItemInventoryDisplay.AllocateIcons += (il) =>
@@ -594,15 +622,23 @@ namespace TPDespair.ZetArtifacts
 
 
 
-		private static void PreventVoidBearBuffBug()
+		private static void RemoveScrapperCard(SceneDirector sceneDirector, DirectorCardCategorySelection dccs)
 		{
-			//On.RoR2.CharacterMaster.OnBodyStart += CharacterMaster_OnBodyStart;
-
-			On.RoR2.CharacterBody.AddTimedBuff_BuffDef_float += CharacterBody_AddTimedBuff_BuffDef_float;
-			On.RoR2.CharacterBody.RemoveBuff_BuffIndex += CharacterBody_RemoveBuff_BuffIndex;
+			if (Enabled && ZetArtifactsPlugin.DropifactRemoveScrapper.Value)
+			{
+				dccs.RemoveCardsThatFailFilter(new Predicate<DirectorCard>(NotScrapper));
+			}
 		}
 
-		private static void CharacterBody_AddTimedBuff_BuffDef_float(On.RoR2.CharacterBody.orig_AddTimedBuff_BuffDef_float orig, CharacterBody self, BuffDef buffDef, float duration)
+		private static bool NotScrapper(DirectorCard card)
+		{
+			GameObject prefab = card.spawnCard.prefab;
+			return !prefab.GetComponent<ScrapperController>();
+		}
+
+
+
+		private static void VoidBearFix_AddTimedBuff(On.RoR2.CharacterBody.orig_AddTimedBuff_BuffDef_float orig, CharacterBody self, BuffDef buffDef, float duration)
 		{
 			if (NetworkServer.active)
 			{
@@ -618,7 +654,7 @@ namespace TPDespair.ZetArtifacts
 			orig(self, buffDef, duration);
 		}
 
-		private static void CharacterBody_RemoveBuff_BuffIndex(On.RoR2.CharacterBody.orig_RemoveBuff_BuffIndex orig, CharacterBody self, BuffIndex buffType)
+		private static void VoidBearFix_RemoveBuff(On.RoR2.CharacterBody.orig_RemoveBuff_BuffIndex orig, CharacterBody self, BuffIndex buffType)
 		{
 			if (NetworkServer.active)
 			{
@@ -628,22 +664,6 @@ namespace TPDespair.ZetArtifacts
 			}
 
 			orig(self, buffType);
-		}
-
-
-
-		private static void RemoveScrapperCard(SceneDirector sceneDirector, DirectorCardCategorySelection dccs)
-		{
-			if (Enabled && ZetArtifactsPlugin.DropifactRemoveScrapper.Value)
-			{
-				dccs.RemoveCardsThatFailFilter(new Predicate<DirectorCard>(NotScrapper));
-			}
-		}
-
-		private static bool NotScrapper(DirectorCard card)
-		{
-			GameObject prefab = card.spawnCard.prefab;
-			return !prefab.GetComponent<ScrapperController>();
 		}
 	}
 }

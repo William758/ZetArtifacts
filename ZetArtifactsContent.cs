@@ -1,4 +1,4 @@
-using RoR2;
+﻿using RoR2;
 using RoR2.ContentManagement;
 using System.Collections;
 using System.Collections.Generic;
@@ -19,6 +19,8 @@ namespace TPDespair.ZetArtifacts
 		{
 			Artifacts.Create();
 			Elites.Create();
+
+			AssignInternalArtifactDefReferences();
 
 			contentPack.artifactDefs.Add(Artifacts.artifactDefs.ToArray());
 			contentPack.eliteDefs.Add(Elites.eliteDefs.ToArray());
@@ -42,18 +44,52 @@ namespace TPDespair.ZetArtifacts
 
 
 
+		public static void AssignInternalArtifactDefReferences()
+		{
+			ZetBazaarifact.ArtifactDef = Artifacts.ZetBazaarifact;
+
+			ZetRevivifact.ArtifactDef = Artifacts.ZetRevivifact;
+
+			ZetMultifact.ArtifactDef = Artifacts.ZetMultifact;
+			ZetHoardifact.ArtifactDef = (!ZetArtifactsPlugin.HoardifactMerge.Value) ? Artifacts.ZetHoardifact : Artifacts.ZetMultifact;
+
+			ZetDropifact.ArtifactDef = Artifacts.ZetDropifact;
+
+			ZetLoopifact.ArtifactDef = Artifacts.ZetLoopifact;
+			ZetEarlifact.ArtifactDef = (!ZetArtifactsPlugin.EarlifactMerge.Value) ? Artifacts.ZetEarlifact : Artifacts.ZetLoopifact;
+
+			ZetEclifact.ArtifactDef = Artifacts.ZetEclifact;
+		}
+
+
+
 		public static class Artifacts
 		{
+			public static ArtifactDef ZetBazaarifact;
 			public static ArtifactDef ZetRevivifact;
 			public static ArtifactDef ZetMultifact;
+			public static ArtifactDef ZetHoardifact;
 			public static ArtifactDef ZetDropifact;
 			public static ArtifactDef ZetLoopifact;
+			public static ArtifactDef ZetEarlifact;
 			public static ArtifactDef ZetEclifact;
 
 			public static List<ArtifactDef> artifactDefs = new List<ArtifactDef>();
 
 			public static void Create()
 			{
+				if (ZetArtifactsPlugin.BazaarifactEnable.Value == 1)
+				{
+					ZetBazaarifact = ScriptableObject.CreateInstance<ArtifactDef>();
+					ZetBazaarifact.cachedName = "ARTIFACT_ZETBAZAARIFACT";
+					ZetBazaarifact.nameToken = "ARTIFACT_ZETBAZAARIFACT_NAME";
+					ZetBazaarifact.descriptionToken = "ARTIFACT_ZETBAZAARIFACT_DESC";
+					ZetBazaarifact.smallIconSelectedSprite = ZetArtifactsPlugin.CreateSprite(Properties.Resources.zetbazaar_selected, Color.magenta);
+					ZetBazaarifact.smallIconDeselectedSprite = ZetArtifactsPlugin.CreateSprite(Properties.Resources.zetbazaar_deselected, Color.gray);
+
+					artifactDefs.Add(ZetBazaarifact);
+				}
+
 				if (ZetArtifactsPlugin.RivivifactEnable.Value == 1)
 				{
 					ZetRevivifact = ScriptableObject.CreateInstance<ArtifactDef>();
@@ -78,6 +114,18 @@ namespace TPDespair.ZetArtifacts
 					artifactDefs.Add(ZetMultifact);
 				}
 
+				if (ZetArtifactsPlugin.HoardifactEnable.Value == 1 && !ZetArtifactsPlugin.HoardifactMerge.Value)
+				{
+					ZetHoardifact = ScriptableObject.CreateInstance<ArtifactDef>();
+					ZetHoardifact.cachedName = "ARTIFACT_ZETHOARDIFACT";
+					ZetHoardifact.nameToken = "ARTIFACT_ZETHOARDIFACT_NAME";
+					ZetHoardifact.descriptionToken = "ARTIFACT_ZETHOARDIFACT_DESC";
+					ZetHoardifact.smallIconSelectedSprite = ZetArtifactsPlugin.CreateSprite(Properties.Resources.zethoard_selected, Color.magenta);
+					ZetHoardifact.smallIconDeselectedSprite = ZetArtifactsPlugin.CreateSprite(Properties.Resources.zethoard_deselected, Color.gray);
+
+					artifactDefs.Add(ZetHoardifact);
+				}
+
 				if (ZetArtifactsPlugin.DropifactEnable.Value == 1)
 				{
 					ZetDropifact = ScriptableObject.CreateInstance<ArtifactDef>();
@@ -100,6 +148,18 @@ namespace TPDespair.ZetArtifacts
 					ZetLoopifact.smallIconDeselectedSprite = ZetArtifactsPlugin.CreateSprite(Properties.Resources.zetloop_deselected, Color.gray);
 
 					artifactDefs.Add(ZetLoopifact);
+				}
+
+				if (ZetArtifactsPlugin.EarlifactEnable.Value == 1 && !ZetArtifactsPlugin.EarlifactMerge.Value)
+				{
+					ZetEarlifact = ScriptableObject.CreateInstance<ArtifactDef>();
+					ZetEarlifact.cachedName = "ARTIFACT_ZETEARLIFACT";
+					ZetEarlifact.nameToken = "ARTIFACT_ZETEARLIFACT_NAME";
+					ZetEarlifact.descriptionToken = "ARTIFACT_ZETEARLIFACT_DESC";
+					ZetEarlifact.smallIconSelectedSprite = ZetArtifactsPlugin.CreateSprite(Properties.Resources.zetearly_selected, Color.magenta);
+					ZetEarlifact.smallIconDeselectedSprite = ZetArtifactsPlugin.CreateSprite(Properties.Resources.zetearly_deselected, Color.gray);
+
+					artifactDefs.Add(ZetEarlifact);
 				}
 
 				if (ZetArtifactsPlugin.EclifactEnable.Value == 1 && !ZetArtifactsPlugin.PluginLoaded("com.TPDespair.DiluvianArtifact"))
@@ -134,11 +194,8 @@ namespace TPDespair.ZetArtifacts
 					HauntedEarly = ScriptableObject.CreateInstance<EliteDef>();
 					eliteDefs.Add(HauntedEarly);
 
-					if (ZetArtifactsPlugin.PluginLoaded("com.arimah.PerfectedLoop"))
-					{
-						LunarEarly = ScriptableObject.CreateInstance<EliteDef>();
-						eliteDefs.Add(LunarEarly);
-					}
+					LunarEarly = ScriptableObject.CreateInstance<EliteDef>();
+					eliteDefs.Add(LunarEarly);
 				}
 			}
 		}

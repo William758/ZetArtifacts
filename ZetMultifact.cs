@@ -1,4 +1,4 @@
-using RoR2;
+﻿using RoR2;
 using MonoMod.Cil;
 using MonoMod.RuntimeDetour;
 using System;
@@ -10,20 +10,17 @@ namespace TPDespair.ZetArtifacts
 {
 	public static class ZetMultifact
 	{
-		private static int state = 0;
+		private static int State = 0;
+		internal static ArtifactDef ArtifactDef;
 
 		public static bool Enabled
 		{
 			get
 			{
-				if (state < 1) return false;
-				else if (state > 1) return true;
-				else
-				{
-					if (RunArtifactManager.instance && RunArtifactManager.instance.IsArtifactEnabled(ZetArtifactsContent.Artifacts.ZetMultifact)) return true;
+				if (State < 1) return false;
+				else if (State > 1) return true;
 
-					return false;
-				}
+				return ZetArtifactsPlugin.ArtifactEnabled(ArtifactDef);
 			}
 		}
 
@@ -31,18 +28,12 @@ namespace TPDespair.ZetArtifacts
 
 		internal static void Init()
 		{
-			state = ZetArtifactsPlugin.MultifactEnable.Value;
-			if (state < 1) return;
+			State = ZetArtifactsPlugin.MultifactEnable.Value;
 
-			int countMult = Math.Max(2, ZetArtifactsPlugin.MultifactMultiplier.Value);
+			if (State < 1) return;
 
-			ZetArtifactsPlugin.RegisterLanguageToken("ARTIFACT_ZETMULTIFACT_NAME", "Artifact of Multitudes");
-			string str;
-			if (countMult == 2) str = "Double";
-			else if (countMult == 3) str = "Triple";
-			else if (countMult == 4) str = "Quadruple";
-			else str = "x" + countMult;
-			ZetArtifactsPlugin.RegisterLanguageToken("ARTIFACT_ZETMULTIFACT_DESC", str + " player count scaling.");
+			ZetArtifactsPlugin.RegisterToken("ARTIFACT_ZETMULTIFACT_NAME", "Artifact of Multitudes");
+			ZetArtifactsPlugin.RegisterToken("ARTIFACT_ZETMULTIFACT_DESC", GetDescription());
 
 			get_LPC_Method = typeof(Run).GetMethod("get_livingPlayerCount", flags);
 			get_PPC_Method = typeof(Run).GetMethod("get_participatingPlayerCount", flags);
@@ -63,13 +54,46 @@ namespace TPDespair.ZetArtifacts
 			PlayerTriggerHook();
 		}
 
+
+
+		private static string GetDescription()
+		{
+			string text;
+
+			int countMult = Math.Max(2, ZetArtifactsPlugin.MultifactMultiplier.Value);
+
+			if (countMult == 2) text = "Double";
+			else if (countMult == 3) text = "Triple";
+			else if (countMult == 4) text = "Quadruple";
+			else text = "x" + countMult;
+
+			text += " player count scaling.";
+
+			if (ZetArtifactsPlugin.HoardifactMerge.Value)
+			{
+				if (ZetArtifactsPlugin.HoardifactDifficulty.Value)
+				{
+					text += "\nCollected items increase difficulty.";
+				}
+
+				if (ZetArtifactsPlugin.HoardifactSetupMoney.Value > 0.095f)
+				{
+					text += "\nInteractable spawns are increased.";
+				}
+			}
+
+			return text;
+		}
+
+
+
 		private static void ShrineCombatBehavior_Start(On.RoR2.ShrineCombatBehavior.orig_Start orig, ShrineCombatBehavior self)
 		{
 			if (self.combatDirector)
 			{
 				float mult = Mathf.Clamp(0.7f + (0.3f * GetMultiplier()), 1f, 3f);
 				self.combatDirector.maximumNumberToSpawnBeforeSkipping = Mathf.CeilToInt(self.combatDirector.maximumNumberToSpawnBeforeSkipping * mult);
-				//Debug.LogWarning("CombatShrine : CombatDirector.maximumNumberToSpawnBeforeSkipping : " + self.combatDirector.maximumNumberToSpawnBeforeSkipping);
+				//ZetArtifactsPlugin.LogWarn("CombatShrine : CombatDirector.maximumNumberToSpawnBeforeSkipping : " + self.combatDirector.maximumNumberToSpawnBeforeSkipping);
 			}
 
 			orig(self);
@@ -105,7 +129,7 @@ namespace TPDespair.ZetArtifacts
 		{
 			if (Run.instance)
 			{
-				Debug.LogWarning("ZetArtifact [ZetMultifact] - Forcing DifficultyCoeff Calc : PreScenePop");
+				ZetArtifactsPlugin.LogInfo("[ZetMultifact] - Forcing DifficultyCoeff Calc : PreScenePop");
 				Run.instance.RecalculateDifficultyCoefficentInternal();
 			}
 		}
@@ -150,7 +174,7 @@ namespace TPDespair.ZetArtifacts
 				}
 				else
 				{
-					Debug.LogWarning("ZetArtifact [ZetMultifact] - GoldFromKillHook Failed!");
+					ZetArtifactsPlugin.LogWarn("[ZetMultifact] - GoldFromKillHook Failed!");
 				}
 			};
 		}
@@ -174,30 +198,46 @@ namespace TPDespair.ZetArtifacts
 			{
 				ILCursor c = new ILCursor(il);
 
-				c.GotoNext(
+				bool found = c.TryGotoNext(
 					x => x.MatchCallOrCallvirt<Run>("get_livingPlayerCount")
 				);
 
-				c.Index += 1;
+				if (found)
+				{
+					c.Index += 1;
 
-				c.EmitDelegate<Func<int, int>>((livingPlayerCount) => {
-					return livingPlayerCount / GetMultiplier();
-				});
+					c.EmitDelegate<Func<int, int>>((livingPlayerCount) =>
+					{
+						return livingPlayerCount / GetMultiplier();
+					});
+				}
+				else
+				{
+					ZetArtifactsPlugin.LogWarn("[ZetMultifact] - PlayerTriggerHook:AllPlayersTrigger Failed!");
+				}
 			};
 
 			IL.RoR2.MultiBodyTrigger.FixedUpdate += (il) =>
 			{
 				ILCursor c = new ILCursor(il);
 
-				c.GotoNext(
+				bool found = c.TryGotoNext(
 					x => x.MatchCallOrCallvirt<Run>("get_livingPlayerCount")
 				);
 
-				c.Index += 1;
+				if (found)
+				{
+					c.Index += 1;
 
-				c.EmitDelegate<Func<int, int>>((livingPlayerCount) => {
-					return livingPlayerCount / GetMultiplier();
-				});
+					c.EmitDelegate<Func<int, int>>((livingPlayerCount) =>
+					{
+						return livingPlayerCount / GetMultiplier();
+					});
+				}
+				else
+				{
+					ZetArtifactsPlugin.LogWarn("[ZetMultifact] - PlayerTriggerHook:MultiBodyTrigger Failed!");
+				}
 			};
 		}
 	}

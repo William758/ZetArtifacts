@@ -2,13 +2,23 @@
 
 Can configure artifacts to be disabled or always active.
 
+Artifact of the Bazaar - The Bazaar Between Time contains a larger variety of interactables.
+
+- Disabled by default. The purpose of this artifact is to toggle other bazaar mod content.
+
+- Relies on other mods to actually populate the bazaar. (like BiggerBazaar and BazaarExpand)
+
 Artifact of Revival - Dead players respawn after the boss is defeated.
 
 Artifact of Tossing - Allows players to drop and scrap items. (LeftAlt + RMB to scrap)
 
 Artifact of Multitudes - Double player count scaling. (stacks multiplicatively with original multitudes mod)
 
-Artifact of Escalation - Monster and interactable types can appear earlier than usual. Post-loop Elites begin to appear at monster level 10.
+Artifact of Sanction - Monster and Interactable types can appear earlier.
+
+Artifact of Accumulation - Collected items increase difficulty. Interactable spawns are increased.
+
+Artifact of Escalation - Post-loop Elites begin to appear at monster level 10. Monster spawns are increased.
 
 Artifact of the Eclipse - Enables all Eclipse modifiers.
 
@@ -19,6 +29,8 @@ Requires Bepinex and R2API.
 Use r2modman or place inside of Risk of Rain 2/Bepinex/Plugins/
 
 ## Changelog:
+
+v1.4.0 - Added Artifacts: Bazaar, Sanction, Accumulation.
 
 v1.3.5 - Apply EarlyElite properties earlier so LittleGameplayTweaks doesn't break.
 

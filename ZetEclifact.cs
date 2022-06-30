@@ -1,4 +1,4 @@
-using MonoMod.Cil;
+﻿using MonoMod.Cil;
 using RoR2;
 using System;
 using UnityEngine;
@@ -7,20 +7,17 @@ namespace TPDespair.ZetArtifacts
 {
 	public static class ZetEclifact
 	{
-		private static int state = 0;
+		private static int State = 0;
+		internal static ArtifactDef ArtifactDef;
 
 		public static bool Enabled
 		{
 			get
 			{
-				if (state < 1) return false;
-				else if (state > 1) return true;
-				else
-				{
-					if (RunArtifactManager.instance && RunArtifactManager.instance.IsArtifactEnabled(ZetArtifactsContent.Artifacts.ZetEclifact)) return true;
+				if (State < 1) return false;
+				else if (State > 1) return true;
 
-					return false;
-				}
+				return ZetArtifactsPlugin.ArtifactEnabled(ArtifactDef);
 			}
 		}
 
@@ -54,7 +51,7 @@ namespace TPDespair.ZetArtifacts
 
 		private static void OnArtifactEnabled(RunArtifactManager runArtifactManager, ArtifactDef artifactDef)
 		{
-			if (artifactDef == ZetArtifactsContent.Artifacts.ZetEclifact)
+			if (artifactDef == ArtifactDef)
 			{
 				EnableEffects();
 			}
@@ -62,7 +59,7 @@ namespace TPDespair.ZetArtifacts
 
 		private static void OnArtifactDisabled(RunArtifactManager runArtifactManager, ArtifactDef artifactDef)
 		{
-			if (artifactDef == ZetArtifactsContent.Artifacts.ZetEclifact)
+			if (artifactDef == ArtifactDef)
 			{
 				DisableEffects();
 			}
@@ -72,14 +69,14 @@ namespace TPDespair.ZetArtifacts
 
 		internal static void Init()
 		{
-			state = ZetArtifactsPlugin.EclifactEnable.Value;
-			if (ZetArtifactsPlugin.PluginLoaded("com.TPDespair.DiluvianArtifact")) state = 0;
-			if (state < 1) return;
+			State = ZetArtifactsPlugin.EclifactEnable.Value;
+			if (ZetArtifactsPlugin.PluginLoaded("com.TPDespair.DiluvianArtifact")) State = 0;
+			if (State < 1) return;
 
-			ZetArtifactsPlugin.RegisterLanguageToken("ARTIFACT_ZETECLIFACT_NAME", "Artifact of the Eclipse");
-			ZetArtifactsPlugin.RegisterLanguageToken("ARTIFACT_ZETECLIFACT_DESC", "Enables all Eclipse modifiers.\n\n<style=cStack>>Ally Starting Health: <style=cDeath>-50%</style>\n>Teleporter Radius: <style=cDeath>-50%</style>\n>Ally Fall Damage: <style=cDeath>+100% and lethal</style>\n>Enemy Speed: <style=cDeath>+40%</style>\n>Ally Healing: <style=cDeath>-50%</style>\n>Enemy Gold Drops: <style=cDeath>-20%</style>\n>Enemy Cooldowns: <style=cDeath>-50%</style>\n>Allies receive <style=cDeath>permanent damage</style></style>");
+			ZetArtifactsPlugin.RegisterToken("ARTIFACT_ZETECLIFACT_NAME", "Artifact of the Eclipse");
+			ZetArtifactsPlugin.RegisterToken("ARTIFACT_ZETECLIFACT_DESC", "Enables all Eclipse modifiers.\n\n<style=cStack>>Ally Starting Health: <style=cDeath>-50%</style>\n>Teleporter Radius: <style=cDeath>-50%</style>\n>Ally Fall Damage: <style=cDeath>+100% and lethal</style>\n>Enemy Speed: <style=cDeath>+40%</style>\n>Ally Healing: <style=cDeath>-50%</style>\n>Enemy Gold Drops: <style=cDeath>-20%</style>\n>Enemy Cooldowns: <style=cDeath>-50%</style>\n>Allies receive <style=cDeath>permanent damage</style></style>");
 
-			if (state == 1)
+			if (State == 1)
 			{
 				RunArtifactManager.onArtifactEnabledGlobal += OnArtifactEnabled;
 				RunArtifactManager.onArtifactDisabledGlobal += OnArtifactDisabled;
@@ -140,7 +137,7 @@ namespace TPDespair.ZetArtifacts
 						}
 						else
 						{
-							Debug.LogWarning("EclipseHook(1) Failed! - LdcI4 Offset [" + offset + "]");
+							ZetArtifactsPlugin.LogWarn("EclipseHook(1) Failed! - LdcI4 Offset [" + offset + "]");
 						}
 					}
 				}
@@ -148,7 +145,7 @@ namespace TPDespair.ZetArtifacts
 
 			if (!found)
 			{
-				Debug.LogWarning("EclipseHook(1) Failed!");
+				ZetArtifactsPlugin.LogWarn("EclipseHook(1) Failed!");
 			}
 		}
 
@@ -200,7 +197,7 @@ namespace TPDespair.ZetArtifacts
 						}
 						else
 						{
-							Debug.LogWarning("EclipseHook(2) Failed! - LdcI4 Offset [" + offset + "]");
+							ZetArtifactsPlugin.LogWarn("EclipseHook(2) Failed! - LdcI4 Offset [" + offset + "]");
 						}
 					}
 				}
@@ -208,7 +205,7 @@ namespace TPDespair.ZetArtifacts
 
 			if (!found)
 			{
-				Debug.LogWarning("EclipseHook(2) Failed!");
+				ZetArtifactsPlugin.LogWarn("EclipseHook(2) Failed!");
 			}
 		}
 
@@ -260,7 +257,7 @@ namespace TPDespair.ZetArtifacts
 						}
 						else
 						{
-							Debug.LogWarning("EclipseHook(3) Failed! - LdcI4 Offset [" + offset + "]");
+							ZetArtifactsPlugin.LogWarn("EclipseHook(3) Failed! - LdcI4 Offset [" + offset + "]");
 						}
 					}
 				}
@@ -268,7 +265,7 @@ namespace TPDespair.ZetArtifacts
 
 			if (!found)
 			{
-				Debug.LogWarning("EclipseHook(3) Failed!");
+				ZetArtifactsPlugin.LogWarn("EclipseHook(3) Failed!");
 			}
 		}
 
@@ -320,7 +317,7 @@ namespace TPDespair.ZetArtifacts
 						}
 						else
 						{
-							Debug.LogWarning("EclipseHook(4) Failed! - LdcI4 Offset [" + offset + "]");
+							ZetArtifactsPlugin.LogWarn("EclipseHook(4) Failed! - LdcI4 Offset [" + offset + "]");
 						}
 					}
 				}
@@ -328,7 +325,7 @@ namespace TPDespair.ZetArtifacts
 
 			if (!found)
 			{
-				Debug.LogWarning("EclipseHook(4) Failed!");
+				ZetArtifactsPlugin.LogWarn("EclipseHook(4) Failed!");
 			}
 		}
 
@@ -380,7 +377,7 @@ namespace TPDespair.ZetArtifacts
 						}
 						else
 						{
-							Debug.LogWarning("EclipseHook(5) Failed! - LdcI4 Offset [" + offset + "]");
+							ZetArtifactsPlugin.LogWarn("EclipseHook(5) Failed! - LdcI4 Offset [" + offset + "]");
 						}
 					}
 				}
@@ -388,7 +385,7 @@ namespace TPDespair.ZetArtifacts
 
 			if (!found)
 			{
-				Debug.LogWarning("EclipseHook(5) Failed!");
+				ZetArtifactsPlugin.LogWarn("EclipseHook(5) Failed!");
 			}
 		}
 
@@ -440,7 +437,7 @@ namespace TPDespair.ZetArtifacts
 						}
 						else
 						{
-							Debug.LogWarning("EclipseHook(6) Failed! - LdcI4 Offset [" + offset + "]");
+							ZetArtifactsPlugin.LogWarn("EclipseHook(6) Failed! - LdcI4 Offset [" + offset + "]");
 						}
 					}
 				}
@@ -448,7 +445,7 @@ namespace TPDespair.ZetArtifacts
 
 			if (!found)
 			{
-				Debug.LogWarning("EclipseHook(6) Failed!");
+				ZetArtifactsPlugin.LogWarn("EclipseHook(6) Failed!");
 			}
 		}
 
@@ -506,7 +503,7 @@ namespace TPDespair.ZetArtifacts
 							}
 							else
 							{
-								Debug.LogWarning("EclipseHook(7) Failed! - LdcI4 Offset [" + offset + "]");
+								ZetArtifactsPlugin.LogWarn("EclipseHook(7) Failed! - LdcI4 Offset [" + offset + "]");
 							}
 						}
 					}
@@ -515,7 +512,7 @@ namespace TPDespair.ZetArtifacts
 
 			if (!found)
 			{
-				Debug.LogWarning("EclipseHook(7) Failed!");
+				ZetArtifactsPlugin.LogWarn("EclipseHook(7) Failed!");
 			}
 		}
 
@@ -567,7 +564,7 @@ namespace TPDespair.ZetArtifacts
 						}
 						else
 						{
-							Debug.LogWarning("EclipseHook(8) Failed! - LdcI4 Offset [" + offset + "]");
+							ZetArtifactsPlugin.LogWarn("EclipseHook(8) Failed! - LdcI4 Offset [" + offset + "]");
 						}
 					}
 				}
@@ -575,7 +572,7 @@ namespace TPDespair.ZetArtifacts
 
 			if (!found)
 			{
-				Debug.LogWarning("EclipseHook(8) Failed!");
+				ZetArtifactsPlugin.LogWarn("EclipseHook(8) Failed!");
 			}
 		}
 	}

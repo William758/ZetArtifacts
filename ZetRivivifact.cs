@@ -1,4 +1,4 @@
-using RoR2;
+﻿using RoR2;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -6,20 +6,17 @@ namespace TPDespair.ZetArtifacts
 {
 	public static class ZetRevivifact
 	{
-		private static int state = 0;
+		private static int State = 0;
+		internal static ArtifactDef ArtifactDef;
 
 		public static bool Enabled
 		{
 			get
 			{
-				if (state < 1) return false;
-				else if (state > 1) return true;
-				else
-				{
-					if (RunArtifactManager.instance && RunArtifactManager.instance.IsArtifactEnabled(ZetArtifactsContent.Artifacts.ZetRevivifact)) return true;
+				if (State < 1) return false;
+				else if (State > 1) return true;
 
-					return false;
-				}
+				return ZetArtifactsPlugin.ArtifactEnabled(ArtifactDef);
 			}
 		}
 
@@ -27,11 +24,12 @@ namespace TPDespair.ZetArtifacts
 
 		internal static void Init()
 		{
-			state = ZetArtifactsPlugin.RivivifactEnable.Value;
-			if (state < 1) return;
+			State = ZetArtifactsPlugin.RivivifactEnable.Value;
 
-			ZetArtifactsPlugin.RegisterLanguageToken("ARTIFACT_ZETREVIVIFACT_NAME", "Artifact of Revival");
-			ZetArtifactsPlugin.RegisterLanguageToken("ARTIFACT_ZETREVIVIFACT_DESC", "Dead players respawn after the boss is defeated.");
+			if (State < 1) return;
+
+			ZetArtifactsPlugin.RegisterToken("ARTIFACT_ZETREVIVIFACT_NAME", "Artifact of Revival");
+			ZetArtifactsPlugin.RegisterToken("ARTIFACT_ZETREVIVIFACT_DESC", "Dead players respawn after the boss is defeated.");
 
 			SaveDeathPositionHook();
 			RevivalHook();

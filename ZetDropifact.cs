@@ -331,7 +331,13 @@ namespace TPDespair.ZetArtifacts
 
 			if (itemDef.tier == ItemTier.NoTier) return false;
 
+			if (!ZetArtifactsPlugin.DropifactT1.Value && IsTier1(itemDef.tier)) return false;
+			if (!ZetArtifactsPlugin.DropifactT2.Value && IsTier2(itemDef.tier)) return false;
+			if (!ZetArtifactsPlugin.DropifactT3.Value && IsTier3(itemDef.tier)) return false;
+			if (!ZetArtifactsPlugin.DropifactBoss.Value && IsBossTier(itemDef.tier)) return false;
+
 			if (!ZetArtifactsPlugin.DropifactLunar.Value && IsLunarTier(itemDef.tier)) return false;
+
 			if (!ZetArtifactsPlugin.DropifactVoid.Value && IsVoidTier(itemDef.tier)) return false;
 			if (!ZetArtifactsPlugin.DropifactUnique.Value && itemDef.ContainsTag(ItemTag.WorldUnique)) return false;
 
@@ -364,6 +370,38 @@ namespace TPDespair.ZetArtifacts
 				default:
 					return false;
 			}
+		}
+
+		private static bool IsTier1(ItemTier tier)
+		{
+			if (tier == ItemTier.Tier1) return true;
+			if (tier == ItemTier.VoidTier1) return true;
+
+			return false;
+		}
+
+		private static bool IsTier2(ItemTier tier)
+		{
+			if (tier == ItemTier.Tier2) return true;
+			if (tier == ItemTier.VoidTier2) return true;
+
+			return false;
+		}
+
+		private static bool IsTier3(ItemTier tier)
+		{
+			if (tier == ItemTier.Tier3) return true;
+			if (tier == ItemTier.VoidTier3) return true;
+
+			return false;
+		}
+
+		private static bool IsBossTier(ItemTier tier)
+		{
+			if (tier == ItemTier.Boss) return true;
+			if (tier == ItemTier.VoidBoss) return true;
+
+			return false;
 		}
 
 		private static bool IsLunarTier(ItemTier tier)

@@ -306,6 +306,7 @@ namespace TPDespair.ZetArtifacts
 			TimeTextMesh.alignment = TMPro.TextAlignmentOptions.MidlineRight;
 			TimeTextMesh.richText = true;
 
+			CurrentTimeText = "";
 			TimeTextMesh.SetText("");
 
 			UpdateUI();

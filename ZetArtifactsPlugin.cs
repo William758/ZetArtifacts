@@ -26,7 +26,7 @@ namespace TPDespair.ZetArtifacts
 
 	public class ZetArtifactsPlugin : BaseUnityPlugin
 	{
-		public const string ModVer = "1.4.0";
+		public const string ModVer = "1.4.1";
 		public const string ModName = "ZetArtifacts";
 		public const string ModGuid = "com.TPDespair.ZetArtifacts";
 
@@ -57,6 +57,10 @@ namespace TPDespair.ZetArtifacts
 		public static ConfigEntry<int> DropifactEnable { get; set; }
 		public static ConfigEntry<bool> DropifactBypassGround { get; set; }
 		public static ConfigEntry<bool> DropifactRemoveScrapper { get; set; }
+		public static ConfigEntry<bool> DropifactT1 { get; set; }
+		public static ConfigEntry<bool> DropifactT2 { get; set; }
+		public static ConfigEntry<bool> DropifactT3 { get; set; }
+		public static ConfigEntry<bool> DropifactBoss { get; set; }
 		public static ConfigEntry<bool> DropifactLunar { get; set; }
 		public static ConfigEntry<bool> DropifactVoid { get; set; }
 		public static ConfigEntry<bool> DropifactUnique { get; set; }
@@ -201,6 +205,22 @@ namespace TPDespair.ZetArtifacts
 			DropifactRemoveScrapper = Config.Bind(
 				"Artifacts", "dropifactRemoveScrapper", false,
 				"Prevent scrappers from appearing while artifact is active."
+			);
+			DropifactT1 = Config.Bind(
+				"Artifacts", "dropifactT1", true,
+				"Allow dropping T1 items."
+			);
+			DropifactT2 = Config.Bind(
+				"Artifacts", "dropifactT2", true,
+				"Allow dropping T2 items."
+			);
+			DropifactT3 = Config.Bind(
+				"Artifacts", "dropifactT3", true,
+				"Allow dropping T3 items."
+			);
+			DropifactBoss = Config.Bind(
+				"Artifacts", "dropifactBoss", true,
+				"Allow dropping boss items."
 			);
 			DropifactLunar = Config.Bind(
 				"Artifacts", "dropifactLunar", true,

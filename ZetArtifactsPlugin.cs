@@ -26,7 +26,7 @@ namespace TPDespair.ZetArtifacts
 
 	public class ZetArtifactsPlugin : BaseUnityPlugin
 	{
-		public const string ModVer = "1.4.1";
+		public const string ModVer = "1.4.2";
 		public const string ModName = "ZetArtifacts";
 		public const string ModGuid = "com.TPDespair.ZetArtifacts";
 
@@ -62,6 +62,11 @@ namespace TPDespair.ZetArtifacts
 		public static ConfigEntry<bool> DropifactT3 { get; set; }
 		public static ConfigEntry<bool> DropifactBoss { get; set; }
 		public static ConfigEntry<bool> DropifactLunar { get; set; }
+		public static ConfigEntry<bool> DropifactVoidT1 { get; set; }
+		public static ConfigEntry<bool> DropifactVoidT2 { get; set; }
+		public static ConfigEntry<bool> DropifactVoidT3 { get; set; }
+		public static ConfigEntry<bool> DropifactVoidBoss { get; set; }
+		public static ConfigEntry<bool> DropifactVoidLunar { get; set; }
 		public static ConfigEntry<bool> DropifactVoid { get; set; }
 		public static ConfigEntry<bool> DropifactUnique { get; set; }
 
@@ -208,27 +213,47 @@ namespace TPDespair.ZetArtifacts
 			);
 			DropifactT1 = Config.Bind(
 				"Artifacts", "dropifactT1", true,
-				"Allow dropping T1 items."
+				"Allow dropping non-void T1 items."
 			);
 			DropifactT2 = Config.Bind(
 				"Artifacts", "dropifactT2", true,
-				"Allow dropping T2 items."
+				"Allow dropping non-void T2 items."
 			);
 			DropifactT3 = Config.Bind(
 				"Artifacts", "dropifactT3", true,
-				"Allow dropping T3 items."
+				"Allow dropping non-void T3 items."
 			);
 			DropifactBoss = Config.Bind(
 				"Artifacts", "dropifactBoss", true,
-				"Allow dropping boss items."
+				"Allow dropping non-void boss items."
 			);
 			DropifactLunar = Config.Bind(
 				"Artifacts", "dropifactLunar", true,
-				"Allow dropping lunar items."
+				"Allow dropping non-void lunar items."
+			);
+			DropifactVoidT1 = Config.Bind(
+				"Artifacts", "dropifactVoidT1", true,
+				"Allow dropping void T1 items."
+			);
+			DropifactVoidT2 = Config.Bind(
+				"Artifacts", "dropifactVoidT2", true,
+				"Allow dropping void T2 items."
+			);
+			DropifactVoidT3 = Config.Bind(
+				"Artifacts", "dropifactVoidT3", true,
+				"Allow dropping void T3 items."
+			);
+			DropifactVoidBoss = Config.Bind(
+				"Artifacts", "dropifactVoidBoss", true,
+				"Allow dropping void boss items."
+			);
+			DropifactVoidLunar = Config.Bind(
+				"Artifacts", "dropifactVoidLunar", true,
+				"Allow dropping void lunar items."
 			);
 			DropifactVoid = Config.Bind(
 				"Artifacts", "dropifactVoid", true,
-				"Allow dropping void items."
+				"Allow dropping ANY void items. Setting this to false will prevent ALL void items from being dropable."
 			);
 			DropifactUnique = Config.Bind(
 				"Artifacts", "dropifactUnique", true,

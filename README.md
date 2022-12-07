@@ -30,7 +30,9 @@ Use r2modman or place inside of Risk of Rain 2/Bepinex/Plugins/
 
 ## Changelog:
 
-v1.4.1 - Added Tossing config for all item tiers. Update Accumulation display on scene change.
+v1.4.2 - Separate Tossing configs for all void item tiers.
+
+v1.4.1 - Added Tossing configs for all item tiers. Update Accumulation display on scene change.
 
 v1.4.0 - Added Artifacts: Bazaar, Sanction, Accumulation.
 

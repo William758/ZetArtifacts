@@ -26,7 +26,7 @@ namespace TPDespair.ZetArtifacts
 
 	public class ZetArtifactsPlugin : BaseUnityPlugin
 	{
-		public const string ModVer = "1.4.2";
+		public const string ModVer = "1.4.3";
 		public const string ModName = "ZetArtifacts";
 		public const string ModGuid = "com.TPDespair.ZetArtifacts";
 
@@ -35,6 +35,7 @@ namespace TPDespair.ZetArtifacts
 		public static ManualLogSource logSource;
 
 		public static ConfigEntry<int> BazaarifactEnable { get; set; }
+		public static ConfigEntry<bool> BazaarHomeExtraCauldrons { get; set; }
 
 		public static ConfigEntry<int> RivivifactEnable { get; set; }
 
@@ -134,6 +135,10 @@ namespace TPDespair.ZetArtifacts
 			BazaarifactEnable = Config.Bind(
 				"Artifacts", "bazaarifactEnable", 0,
 				"Artifact of the Bazzar. 0 = Disabled, 1 = Artifact Available, 2 = Always Active"
+			);
+			BazaarHomeExtraCauldrons = Config.Bind(
+				"Artifacts", "bazaarHomeExtraCauldrons", true,
+				"Allow additional cauldrons from BazaarIsMyHome even if artifact is available and not being used."
 			);
 
 			RivivifactEnable = Config.Bind(

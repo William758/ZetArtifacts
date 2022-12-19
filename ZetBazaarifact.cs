@@ -41,15 +41,17 @@ namespace TPDespair.ZetArtifacts
 
 		internal static void LateSetup()
 		{
-			if (State < 1) return;
+			// we dont need to hook if the artifact is disabled or always enabled
+			if (State == 1)
+			{
+				if (ZetArtifactsPlugin.PluginLoaded("com.MagnusMagnuson.BiggerBazaar")) BiggerBazaar();
+				if (ZetArtifactsPlugin.PluginLoaded("com.MagnusMagnuson.BazaarPrinter")) BazaarPrinter();
+				if (ZetArtifactsPlugin.PluginLoaded("com.NetherCrowCSOLYOO.BazaarExpand")) BazaarExpand();
+				if (ZetArtifactsPlugin.PluginLoaded("KevinPione.BazaareScrapper")) BazaareScrapper();
 
-			if (ZetArtifactsPlugin.PluginLoaded("com.MagnusMagnuson.BiggerBazaar")) BiggerBazaar();
-			if (ZetArtifactsPlugin.PluginLoaded("com.MagnusMagnuson.BazaarPrinter")) BazaarPrinter();
-			if (ZetArtifactsPlugin.PluginLoaded("com.NetherCrowCSOLYOO.BazaarExpand")) BazaarExpand();
-			if (ZetArtifactsPlugin.PluginLoaded("KevinPione.BazaareScrapper")) BazaareScrapper();
-
-			if (ZetArtifactsPlugin.PluginLoaded("com.zorp.ConfigurableBazaar")) ConfigurableBazaar();
-			if (ZetArtifactsPlugin.PluginLoaded("com.Lunzir.BazaarIsMyHome")) BazaarIsMyHome();
+				if (ZetArtifactsPlugin.PluginLoaded("com.zorp.ConfigurableBazaar")) ConfigurableBazaar();
+				if (ZetArtifactsPlugin.PluginLoaded("com.Lunzir.BazaarIsMyHome")) BazaarIsMyHome();
+			}
 		}
 
 
@@ -140,7 +142,12 @@ namespace TPDespair.ZetArtifacts
 			BaseUnityPlugin Plugin = BepInEx.Bootstrap.Chainloader.PluginInfos["com.Lunzir.BazaarIsMyHome"].Instance;
 			Type PluginType = Plugin.GetType();
 
-			List<string> methodNames = new List<string> { "SpawnPrinters", "SpawnScrapper", "SpawnEquipment", "SpawnLunarShopTerminal", "SpawnShrineCleanse", "SpawnShrineRestack", "SpawnShrineHealing" };
+			List<string> methodNames = new List<string> { "SpawnPrinters", "SpawnScrapper", "SpawnEquipment", "SpawnShrineCleanse", "SpawnShrineRestack", "SpawnShrineHealing" };
+
+			if (!ZetArtifactsPlugin.BazaarHomeExtraCauldrons.Value)
+			{
+				methodNames.Add("SpawnLunarCauldron");
+			}
 
 			foreach (string methodName in methodNames)
 			{

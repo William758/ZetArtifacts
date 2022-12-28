@@ -30,6 +30,8 @@ Use r2modman or place inside of Risk of Rain 2/Bepinex/Plugins/
 
 ## Changelog:
 
+v1.4.4 - Added Aragonite Elites to Escalation.
+
 v1.4.3 - Fixed Artifact of the Bazaar preventing BazaarIsMyHome from spawning lunar pods.
 
 v1.4.2 - Separate Tossing configs for all void item tiers.

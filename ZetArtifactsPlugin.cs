@@ -26,7 +26,7 @@ namespace TPDespair.ZetArtifacts
 
 	public class ZetArtifactsPlugin : BaseUnityPlugin
 	{
-		public const string ModVer = "1.4.3";
+		public const string ModVer = "1.4.4";
 		public const string ModName = "ZetArtifacts";
 		public const string ModGuid = "com.TPDespair.ZetArtifacts";
 
@@ -73,6 +73,7 @@ namespace TPDespair.ZetArtifacts
 
 		public static ConfigEntry<int> LoopifactEnable { get; set; }
 		public static ConfigEntry<int> LoopifactEliteLevel { get; set; }
+		public static ConfigEntry<bool> LoopifactEliteClassic { get; set; }
 		public static ConfigEntry<float> LoopifactCombatMoney { get; set; }
 		public static ConfigEntry<float> LoopifactMonsterCostTarget { get; set; }
 		public static ConfigEntry<float> LoopifactMonsterCostFactor { get; set; }
@@ -124,6 +125,8 @@ namespace TPDespair.ZetArtifacts
 			ZetHoardifact.LateSetup();
 
 			ZetDropifact.LateSetup();
+
+			ZetLoopifact.LateSetup();
 
 			DirectorCardManipulator.LateSetup();
 		}
@@ -272,6 +275,10 @@ namespace TPDespair.ZetArtifacts
 			LoopifactEliteLevel = Config.Bind(
 				"Artifacts", "loopifactEliteLevel", 10,
 				"Ambient level for T2 elites to spawn during first loop. -1 to disable early T2 elites."
+			);
+			LoopifactEliteClassic = Config.Bind(
+				"Artifacts", "loopifactEliteClassic", true,
+				"Change cost, health, and damage values to 35% towards T2 elite values instead of equal to T1 elite values."
 			);
 			LoopifactCombatMoney = Config.Bind(
 				"Artifacts", "loopifactCombatMoney", 0.1f,

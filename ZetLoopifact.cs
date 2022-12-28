@@ -12,6 +12,8 @@ namespace TPDespair.ZetArtifacts
 		public static CombatDirector.EliteTierDef earlyEliteDef;
 		public static bool disableEarlyEliteDef = true;
 
+		private static bool AragonFinalized = false;
+
 		internal static int State = 0;
 		internal static ArtifactDef ArtifactDef;
 
@@ -45,6 +47,13 @@ namespace TPDespair.ZetArtifacts
 			DirectorMoneyHook();
 
 			On.RoR2.EliteCatalog.Init += EliteCatalogInitHook;
+		}
+
+		internal static void LateSetup()
+		{
+			if (State < 1) return;
+
+			FinalizeEliteProperties();
 		}
 
 
@@ -130,7 +139,13 @@ namespace TPDespair.ZetArtifacts
 					eliteDefs.Add(ZetArtifactsContent.Elites.LunarEarly);
 				}
 
+				if (AragonFinalized)
+				{
+					eliteDefs.Add(ZetArtifactsContent.Elites.AragonEarly);
+				}
+
 				if (Enabled) ZetArtifactsPlugin.LogInfo("[ZetLoopifact] - Rebuild EarlyEliteTypeArray : " + eliteDefs.Count);
+
 				earlyEliteDef.eliteTypes = eliteDefs.ToArray();
 			}
 		}
@@ -139,9 +154,15 @@ namespace TPDespair.ZetArtifacts
 
 		private static void AddEarlyEliteDef()
 		{
+			float cost = CombatDirector.baseEliteCostMultiplier;
+			if (ZetArtifactsPlugin.LoopifactEliteClassic.Value)
+			{
+				cost = Mathf.LerpUnclamped(1f, CombatDirector.baseEliteCostMultiplier * 6f, 0.35f);
+			}
+
 			earlyEliteDef = new CombatDirector.EliteTierDef
 			{
-				costMultiplier = Mathf.LerpUnclamped(1f, CombatDirector.baseEliteCostMultiplier * 6f, 0.35f),
+				costMultiplier = cost,
 				eliteTypes = new EliteDef[] { },
 				isAvailable = (SpawnCard.EliteRules rules) => IsEarlyEliteDefAvailable(rules),
 				canSelectWithoutAvailableEliteDef = false
@@ -149,7 +170,6 @@ namespace TPDespair.ZetArtifacts
 
 			ZetArtifactsPlugin.LogInfo("[ZetLoopifact] - AddCustomEliteTier : EarlyEliteTierDef");
 			EliteAPI.AddCustomEliteTier(earlyEliteDef);
-
 		}
 
 		private static bool IsEarlyEliteDefAvailable(SpawnCard.EliteRules rules)
@@ -209,21 +229,79 @@ namespace TPDespair.ZetArtifacts
 
 		private static void ApplyEarlyEliteProperties()
 		{
-			EliteDef t2Elite = RoR2Content.Elites.Poison;
-
 			CopyEliteEquipment(ZetArtifactsContent.Elites.PoisonEarly, RoR2Content.Elites.Poison);
 			CopyBasicAttributes(ZetArtifactsContent.Elites.PoisonEarly, RoR2Content.Elites.Poison);
-			ApplyStatBoosts(ZetArtifactsContent.Elites.PoisonEarly, t2Elite);
+			ApplyStatBoosts(ZetArtifactsContent.Elites.PoisonEarly);
 
 			CopyEliteEquipment(ZetArtifactsContent.Elites.HauntedEarly, RoR2Content.Elites.Haunted);
 			CopyBasicAttributes(ZetArtifactsContent.Elites.HauntedEarly, RoR2Content.Elites.Haunted);
-			ApplyStatBoosts(ZetArtifactsContent.Elites.HauntedEarly, t2Elite);
+			ApplyStatBoosts(ZetArtifactsContent.Elites.HauntedEarly);
 
 			CopyEliteEquipment(ZetArtifactsContent.Elites.LunarEarly, RoR2Content.Elites.Lunar);
 			CopyBasicAttributes(ZetArtifactsContent.Elites.LunarEarly, RoR2Content.Elites.Lunar);
-			ApplyStatBoosts(ZetArtifactsContent.Elites.LunarEarly, t2Elite);
+			ApplyStatBoosts(ZetArtifactsContent.Elites.LunarEarly);
+
+			CopyEliteEquipment(ZetArtifactsContent.Elites.AragonEarly, RoR2Content.Elites.Poison);
+			CopyBasicAttributes(ZetArtifactsContent.Elites.AragonEarly, RoR2Content.Elites.Poison);
+			ApplyStatBoosts(ZetArtifactsContent.Elites.AragonEarly);
 
 			ZetArtifactsPlugin.LogInfo("[ZetLoopifact] - ApplyEarlyEliteProperties");
+		}
+
+		private static void FinalizeEliteProperties()
+		{
+			if (ZetArtifactsPlugin.PluginLoaded("com.plasmacore.PlasmaCoreSpikestripContent"))
+			{
+				if (FinalizeElite(ZetArtifactsContent.Elites.AragonEarly, "EQUIPMENT_AFFIXARAGONITE"))
+				{
+					AragonFinalized = true;
+					ZetArtifactsPlugin.LogInfo("[ZetLoopifact] - Added support for Aragonite Elites!");
+				}
+			}
+		}
+
+		private static bool FinalizeElite(EliteDef targetElite, string equipmentName)
+		{
+			EquipmentIndex index = EquipmentCatalog.FindEquipmentIndex(equipmentName);
+			if (index != EquipmentIndex.None)
+			{
+				EquipmentDef equip = EquipmentCatalog.GetEquipmentDef(index);
+				if (equip)
+				{
+					EliteDef eliteDef = GetFirstEliteDefWithEquipment(equip);
+					if (eliteDef)
+					{
+						CopyEliteEquipment(targetElite, eliteDef);
+						CopyBasicAttributes(targetElite, eliteDef);
+
+						return true;
+					}
+					else
+					{
+						ZetArtifactsPlugin.LogWarn("[ZetLoopifact] - Failed to finalize elite! could not find an eliteDef using equipment : " + equipmentName);
+					}
+				}
+			}
+			else
+			{
+				ZetArtifactsPlugin.LogWarn("[ZetLoopifact] - Failed to finalize elite! could not find equipment : " + equipmentName);
+			}
+
+			return false;
+		}
+
+		private static EliteDef GetFirstEliteDefWithEquipment(EquipmentDef equip)
+		{
+			foreach (EliteIndex eliteIndex in EliteCatalog.eliteList)
+			{
+				EliteDef eliteDef = EliteCatalog.GetEliteDef(eliteIndex);
+				if (eliteDef && eliteDef.eliteEquipmentDef == equip)
+				{
+					return eliteDef;
+				}
+			}
+
+			return null;
 		}
 
 		private static void CopyEliteEquipment(EliteDef target, EliteDef copyFrom)
@@ -245,10 +323,22 @@ namespace TPDespair.ZetArtifacts
 			target.shaderEliteRampIndex = copyFrom.shaderEliteRampIndex;
 		}
 
-		private static void ApplyStatBoosts(EliteDef target, EliteDef copyFrom)
+		private static void ApplyStatBoosts(EliteDef target)
 		{
-			target.damageBoostCoefficient = Mathf.LerpUnclamped(1f, copyFrom.damageBoostCoefficient, 0.35f);
-			target.healthBoostCoefficient = Mathf.LerpUnclamped(1f, copyFrom.healthBoostCoefficient, 0.35f);
+			if (ZetArtifactsPlugin.LoopifactEliteClassic.Value)
+			{
+				EliteDef t2Elite = RoR2Content.Elites.Poison;
+
+				target.damageBoostCoefficient = Mathf.LerpUnclamped(1f, t2Elite.damageBoostCoefficient, 0.35f);
+				target.healthBoostCoefficient = Mathf.LerpUnclamped(1f, t2Elite.healthBoostCoefficient, 0.35f);
+			}
+			else
+			{
+				EliteDef t1Elite = RoR2Content.Elites.Fire;
+
+				target.damageBoostCoefficient = t1Elite.damageBoostCoefficient;
+				target.healthBoostCoefficient = t1Elite.healthBoostCoefficient;
+			}
 		}
 	}
 }

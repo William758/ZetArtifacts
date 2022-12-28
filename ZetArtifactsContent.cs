@@ -181,6 +181,7 @@ namespace TPDespair.ZetArtifacts
 			public static EliteDef PoisonEarly;
 			public static EliteDef HauntedEarly;
 			public static EliteDef LunarEarly;
+			public static EliteDef AragonEarly;
 
 			public static List<EliteDef> eliteDefs = new List<EliteDef>();
 
@@ -196,6 +197,9 @@ namespace TPDespair.ZetArtifacts
 
 					LunarEarly = ScriptableObject.CreateInstance<EliteDef>();
 					eliteDefs.Add(LunarEarly);
+
+					AragonEarly = ScriptableObject.CreateInstance<EliteDef>();
+					eliteDefs.Add(AragonEarly);
 				}
 			}
 		}

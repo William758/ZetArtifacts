@@ -30,6 +30,8 @@ Use r2modman or place inside of Risk of Rain 2/Bepinex/Plugins/
 
 ## Changelog:
 
+v1.4.5 - Added Blighted Elites to Escalation. Escalation has a chance to reroll T1 Elites into early T2 Elites.
+
 v1.4.4 - Added Aragonite Elites to Escalation.
 
 v1.4.3 - Fixed Artifact of the Bazaar preventing BazaarIsMyHome from spawning lunar pods.

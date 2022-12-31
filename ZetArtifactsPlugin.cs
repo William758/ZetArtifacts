@@ -26,7 +26,7 @@ namespace TPDespair.ZetArtifacts
 
 	public class ZetArtifactsPlugin : BaseUnityPlugin
 	{
-		public const string ModVer = "1.4.4";
+		public const string ModVer = "1.4.5";
 		public const string ModName = "ZetArtifacts";
 		public const string ModGuid = "com.TPDespair.ZetArtifacts";
 
@@ -74,6 +74,8 @@ namespace TPDespair.ZetArtifacts
 		public static ConfigEntry<int> LoopifactEnable { get; set; }
 		public static ConfigEntry<int> LoopifactEliteLevel { get; set; }
 		public static ConfigEntry<bool> LoopifactEliteClassic { get; set; }
+		public static ConfigEntry<float> LoopifactEliteReplacementChance { get; set; }
+		public static ConfigEntry<float> LoopifactEliteReplacementFactor { get; set; }
 		public static ConfigEntry<float> LoopifactCombatMoney { get; set; }
 		public static ConfigEntry<float> LoopifactMonsterCostTarget { get; set; }
 		public static ConfigEntry<float> LoopifactMonsterCostFactor { get; set; }
@@ -279,6 +281,14 @@ namespace TPDespair.ZetArtifacts
 			LoopifactEliteClassic = Config.Bind(
 				"Artifacts", "loopifactEliteClassic", true,
 				"Change cost, health, and damage values to 35% towards T2 elite values instead of equal to T1 elite values."
+			);
+			LoopifactEliteReplacementChance = Config.Bind(
+				"Artifacts", "loopifactEliteReplacementChance", 0.1f,
+				"Base chance that a T1 Elite will be changed into a random early T2 Elite. 0.1 = 10% chance."
+			);
+			LoopifactEliteReplacementFactor = Config.Bind(
+				"Artifacts", "loopifactEliteReplacementFactor", 0.35f,
+				"Every mod that adds t1 Elites increases replacment chance. Chance = 1 - ((1 - ReplacementChance) ^ (1 + (ModCount * ReplacementFactor)))"
 			);
 			LoopifactCombatMoney = Config.Bind(
 				"Artifacts", "loopifactCombatMoney", 0.1f,

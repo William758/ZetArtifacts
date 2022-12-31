@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using RoR2;
 using UnityEngine;
 using MonoMod.Cil;
+using Mono.Cecil.Cil;
 using R2API;
 
 namespace TPDespair.ZetArtifacts
@@ -13,6 +15,10 @@ namespace TPDespair.ZetArtifacts
 		public static bool disableEarlyEliteDef = true;
 
 		private static bool AragonFinalized = false;
+		private static bool BlightedFinalized = false;
+
+		private static List<EquipmentDef> ReplacableEliteTypes = new List<EquipmentDef>();
+		private static int EliteModCount = 0;
 
 		internal static int State = 0;
 		internal static ArtifactDef ArtifactDef;
@@ -45,6 +51,7 @@ namespace TPDespair.ZetArtifacts
 
 			AddEarlyEliteDef();
 			DirectorMoneyHook();
+			OverrideEliteDefHook();
 
 			On.RoR2.EliteCatalog.Init += EliteCatalogInitHook;
 		}
@@ -53,6 +60,7 @@ namespace TPDespair.ZetArtifacts
 		{
 			if (State < 1) return;
 
+			BuildReplacableElites();
 			FinalizeEliteProperties();
 		}
 
@@ -144,6 +152,11 @@ namespace TPDespair.ZetArtifacts
 					eliteDefs.Add(ZetArtifactsContent.Elites.AragonEarly);
 				}
 
+				if (BlightedFinalized)
+				{
+					eliteDefs.Add(ZetArtifactsContent.Elites.BlightedEarly);
+				}
+
 				if (Enabled) ZetArtifactsPlugin.LogInfo("[ZetLoopifact] - Rebuild EarlyEliteTypeArray : " + eliteDefs.Count);
 
 				earlyEliteDef.eliteTypes = eliteDefs.ToArray();
@@ -218,6 +231,82 @@ namespace TPDespair.ZetArtifacts
 			};
 		}
 
+		private static void OverrideEliteDefHook()
+		{
+			IL.RoR2.CombatDirector.AttemptSpawnOnTarget += (il) =>
+			{
+				ILCursor c = new ILCursor(il);
+
+				bool found = c.TryGotoNext(
+					x => x.MatchStloc(4)
+				);
+
+				if (found)
+				{
+					c.Index += 1;
+
+					c.Emit(OpCodes.Ldarg, 0);
+					c.Emit(OpCodes.Ldloc, 3);
+					c.EmitDelegate<Func<CombatDirector, EliteDef, EliteDef>>((director, eliteDef) =>
+					{
+						if (!Enabled) return eliteDef;
+
+						if (eliteDef == null) return eliteDef;
+
+						if (RollReplaceEliteDef(eliteDef.eliteEquipmentDef))
+						{
+							if (IsEarlyEliteDefAvailable(director.currentMonsterCard.spawnCard.eliteRules))
+							{
+								EliteDef result = GetRandomEarlyEliteDef(director.rng);
+								if (result != null)
+								{
+									return result;
+								}
+							}
+						}
+
+						return eliteDef;
+					});
+					c.Emit(OpCodes.Stloc, 3);
+				}
+				else
+				{
+					ZetArtifactsPlugin.LogWarn("[ZetLoopifact] - OverrideEliteDefHook Failed!");
+				}
+			};
+		}
+
+		private static bool RollReplaceEliteDef(EquipmentDef equip)
+		{
+			if (ReplacableEliteTypes.Contains(equip))
+			{
+				float chance = ZetArtifactsPlugin.LoopifactEliteReplacementChance.Value;
+
+				if (chance >= 1f) return true;
+				if (chance <= 0f) return false;
+
+				if (EliteModCount > 0)
+				{
+					float modExponent = 1f + (EliteModCount * ZetArtifactsPlugin.LoopifactEliteReplacementFactor.Value);
+
+					if (modExponent > 1f) chance = 1f - Mathf.Pow(1f - chance, modExponent);
+				}
+
+				return UnityEngine.Random.value <= chance;
+			}
+
+			return false;
+		}
+
+		private static EliteDef GetRandomEarlyEliteDef(Xoroshiro128Plus rng)
+		{
+			List<EliteDef> elites = earlyEliteDef.eliteTypes.ToList();
+
+			if (elites.Count > 0) return rng.NextElementUniform(elites);
+
+			return null;
+		}
+
 
 
 		private static void EliteCatalogInitHook(On.RoR2.EliteCatalog.orig_Init orig)
@@ -245,7 +334,69 @@ namespace TPDespair.ZetArtifacts
 			CopyBasicAttributes(ZetArtifactsContent.Elites.AragonEarly, RoR2Content.Elites.Poison);
 			ApplyStatBoosts(ZetArtifactsContent.Elites.AragonEarly);
 
+			CopyEliteEquipment(ZetArtifactsContent.Elites.BlightedEarly, RoR2Content.Elites.Haunted);
+			CopyBasicAttributes(ZetArtifactsContent.Elites.BlightedEarly, RoR2Content.Elites.Haunted);
+			ApplyStatBoosts(ZetArtifactsContent.Elites.BlightedEarly);
+
 			ZetArtifactsPlugin.LogInfo("[ZetLoopifact] - ApplyEarlyEliteProperties");
+		}
+
+		private static void BuildReplacableElites()
+		{
+			ReplacableEliteTypes.Clear();
+			EliteModCount = 0;
+
+			List<string> equipNames = new List<string> { "EliteFireEquipment", "EliteIceEquipment", "EliteLightningEquipment", "EliteEarthEquipment" };
+			HandleReplacableEliteSet(equipNames, false);
+
+			if (ZetArtifactsPlugin.PluginLoaded("com.plasmacore.PlasmaCoreSpikestripContent"))
+			{
+				equipNames = new List<string> { "EQUIPMENT_AFFIXPLATED", "EQUIPMENT_AFFIXWARPED", "EQUIPMENT_AFFIXVEILED" };
+				HandleReplacableEliteSet(equipNames);
+			}
+
+			if (ZetArtifactsPlugin.PluginLoaded("com.KomradeSpectre.Aetherium"))
+			{
+				equipNames = new List<string> { "AETHERIUM_ELITE_EQUIPMENT_AFFIX_SANGUINE" };
+				HandleReplacableEliteSet(equipNames);
+			}
+
+			if (ZetArtifactsPlugin.PluginLoaded("com.PopcornFactory.WispMod"))
+			{
+				equipNames = new List<string> { "WARFRAMEWISP_ELITE_EQUIPMENT_AFFIX_NULLIFIER" };
+				HandleReplacableEliteSet(equipNames);
+			}
+
+			ZetArtifactsPlugin.LogInfo("[ZetLoopifact] - Replacable Elite Types : " + ReplacableEliteTypes.Count );
+		}
+
+		private static void HandleReplacableEliteSet(List<string> equipNames, bool count = true)
+		{
+			bool foundAny = false;
+
+			foreach (string equipName in equipNames)
+			{
+				EquipmentIndex index = EquipmentCatalog.FindEquipmentIndex(equipName);
+				if (index != EquipmentIndex.None)
+				{
+					EquipmentDef equip = EquipmentCatalog.GetEquipmentDef(index);
+					if (equip)
+					{
+						foundAny = true;
+
+						if (!ReplacableEliteTypes.Contains(equip))
+						{
+							ReplacableEliteTypes.Add(equip);
+						}
+					}
+				}
+				else
+				{
+					ZetArtifactsPlugin.LogWarn("[ZetLoopifact] - Failed to set elite as replacable! could not find equipment : " + equipName);
+				}
+			}
+
+			if (count && foundAny) EliteModCount += 1;
 		}
 
 		private static void FinalizeEliteProperties()
@@ -256,6 +407,15 @@ namespace TPDespair.ZetArtifacts
 				{
 					AragonFinalized = true;
 					ZetArtifactsPlugin.LogInfo("[ZetLoopifact] - Added support for Aragonite Elites!");
+				}
+			}
+
+			if (ZetArtifactsPlugin.PluginLoaded("com.Moffein.BlightedElites"))
+			{
+				if (FinalizeElite(ZetArtifactsContent.Elites.BlightedEarly, "AffixBlightedMoffein"))
+				{
+					BlightedFinalized = true;
+					ZetArtifactsPlugin.LogInfo("[ZetLoopifact] - Added support for Blighted Elites!");
 				}
 			}
 		}

@@ -138,7 +138,7 @@ namespace TPDespair.ZetArtifacts
 			if (State < 1) return;
 
 			ZetArtifactsPlugin.RegisterToken("ARTIFACT_ZETDROPIFACT_NAME", "Artifact of Tossing");
-			ZetArtifactsPlugin.RegisterToken("ARTIFACT_ZETDROPIFACT_DESC", "Allows players to drop and scrap items.\n\n<style=cStack>LeftAlt + RMB to scrap</style>");
+			ZetArtifactsPlugin.RegisterToken("ARTIFACT_ZETDROPIFACT_DESC", "Allows players to drop and scrap items.\n\n<style=cStack>" + (ZetArtifactsPlugin.DropifactAltScrap.Value ? "LeftAlt + " : "") + "RMB to scrap</style>");
 
 			NetworkingAPI.RegisterMessageType<ZetDropReply>();
 			NetworkingAPI.RegisterMessageType<ZetDropRequest>();

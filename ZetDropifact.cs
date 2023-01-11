@@ -195,7 +195,7 @@ namespace TPDespair.ZetArtifacts
 			CharacterBody body = master.GetBody();
 			if (!body) return;
 
-			bool scrap = Input.GetKey(KeyCode.LeftAlt) && eventData.button == PointerEventData.InputButton.Right;
+			bool scrap = (!ZetArtifactsPlugin.DropifactAltScrap.Value || Input.GetKey(KeyCode.LeftAlt)) && eventData.button == PointerEventData.InputButton.Right;
 
 			float aimAngle = GetAimAngle(body);
 

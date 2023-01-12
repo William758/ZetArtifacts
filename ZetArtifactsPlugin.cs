@@ -221,6 +221,10 @@ namespace TPDespair.ZetArtifacts
 				"Artifacts", "dropifactRemoveScrapper", false,
 				"Prevent scrappers from appearing while artifact is active."
 			);
+			DropifactAltScrap = Config.Bind(
+				"Artifacts", "dropifactAltScrap", true,
+				"Set to false to scrap with RMB instead of Alt+RMB."
+			);
 			DropifactT1 = Config.Bind(
 				"Artifacts", "dropifactT1", true,
 				"Allow dropping non-void T1 items."

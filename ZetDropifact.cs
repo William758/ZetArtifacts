@@ -664,6 +664,8 @@ namespace TPDespair.ZetArtifacts
 
 		private static void VoidBearFix_AddTimedBuff(On.RoR2.CharacterBody.orig_AddTimedBuff_BuffDef_float orig, CharacterBody self, BuffDef buffDef, float duration)
 		{
+			if (buffDef == null) return;
+
 			if (NetworkServer.active)
 			{
 				BuffIndex buff = DLC1Content.Buffs.BearVoidCooldown.buffIndex;
@@ -673,6 +675,8 @@ namespace TPDespair.ZetArtifacts
 					self.ClearTimedBuffs(buff);
 					self.SetBuffCount(buff, 0);
 				}
+
+				// Unlike ZetAspects, BearVoidCooldown has not been set to stack so we don't need to apply the buff multiple times.
 			}
 
 			orig(self, buffDef, duration);

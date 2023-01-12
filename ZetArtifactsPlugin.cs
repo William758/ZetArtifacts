@@ -26,7 +26,7 @@ namespace TPDespair.ZetArtifacts
 
 	public class ZetArtifactsPlugin : BaseUnityPlugin
 	{
-		public const string ModVer = "1.4.5";
+		public const string ModVer = "1.4.6";
 		public const string ModName = "ZetArtifacts";
 		public const string ModGuid = "com.TPDespair.ZetArtifacts";
 
@@ -58,6 +58,7 @@ namespace TPDespair.ZetArtifacts
 		public static ConfigEntry<int> DropifactEnable { get; set; }
 		public static ConfigEntry<bool> DropifactBypassGround { get; set; }
 		public static ConfigEntry<bool> DropifactRemoveScrapper { get; set; }
+		public static ConfigEntry<bool> DropifactAltScrap { get; set; }
 		public static ConfigEntry<bool> DropifactT1 { get; set; }
 		public static ConfigEntry<bool> DropifactT2 { get; set; }
 		public static ConfigEntry<bool> DropifactT3 { get; set; }

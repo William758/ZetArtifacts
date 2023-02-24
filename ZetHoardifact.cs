@@ -4,12 +4,22 @@ using RoR2.UI;
 using UnityEngine;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
+using System.Reflection;
+using BepInEx;
+using BepInEx.Bootstrap;
 
 namespace TPDespair.ZetArtifacts
 {
 	public static class ZetHoardifact
 	{
 		private static float AddedElapsedTime = 0f;
+		private static float AddedMysticTime = 0f;
+
+		private static readonly BindingFlags Flags = BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
+		private static Type TimeCubeItem;
+		private static FieldInfo MysticTimeField;
+		private static bool HasMysticTime = false;
+		private static float MysticReadTimer = 0.65f;
 
 		public static ItemTier LunarVoidTier = ItemTier.AssignedAtRuntime;
 
@@ -72,6 +82,35 @@ namespace TPDespair.ZetArtifacts
 			{
 				LunarVoidTier = itemTierDef.tier;
 			}
+
+			GetTimeCubeInfo();
+		}
+
+		private static void GetTimeCubeInfo()
+		{
+			string GUID = "com.themysticsword.mysticsitems";
+
+			if (!Chainloader.PluginInfos.ContainsKey(GUID)) return;
+
+			BaseUnityPlugin Plugin = Chainloader.PluginInfos[GUID].Instance;
+			Assembly PluginAssembly = Assembly.GetAssembly(Plugin.GetType());
+
+			Type type;
+
+			type = Type.GetType("MysticsItems.Items.RegenAndDifficultySpeed, " + PluginAssembly.FullName, false);
+			if (type != null)
+			{
+				TimeCubeItem = type;
+
+				MysticTimeField = type.GetField("extraDifficultyTime", Flags);
+				if (MysticTimeField == null) ZetArtifactsPlugin.LogWarn("[Hordifact] - Could Not Find Field : RegenAndDifficultySpeed.extraDifficultyTime");
+			}
+			else
+			{
+				ZetArtifactsPlugin.LogWarn("[Hordifact] - Could Not Find Type : MysticsItems.Items.RegenAndDifficultySpeed");
+			}
+
+			if (TimeCubeItem != null && MysticTimeField != null) HasMysticTime = true;
 		}
 
 
@@ -103,11 +142,34 @@ namespace TPDespair.ZetArtifacts
 				RecalcTimer -= Time.fixedDeltaTime;
 				if (RecalcTimer <= 0f)
 				{
-					Recalc = false;
-					RecalcTimer = 0.25f;
-
 					UpdateKleptoValue();
+					UpdateMysticTime();
+					UpdateUI();
 				}
+			}
+
+			if (HasMysticTime)
+			{
+				MysticReadTimer -= Time.fixedDeltaTime;
+				if (MysticReadTimer <= 0f)
+				{
+					UpdateMysticTime();
+					UpdateUI();
+				}
+			}
+		}
+
+		private static void UpdateMysticTime()
+		{
+			MysticReadTimer = 0.65f;
+
+			if (IsNormalRun() && HasMysticTime)
+			{
+				AddedMysticTime = (float)MysticTimeField.GetValue(TimeCubeItem);
+			}
+			else
+			{
+				AddedMysticTime = 0f;
 			}
 		}
 
@@ -148,18 +210,23 @@ namespace TPDespair.ZetArtifacts
 		private static void Run_onRunDestroyGlobal(Run run)
 		{
 			ResetKleptoValue();
+			AddedMysticTime = 0f;
+			UpdateUI();
 		}
 
 		private static void Run_onRunStartGlobal(Run run)
 		{
+			ResetKleptoValue();
+			AddedMysticTime = 0f;
+
 			if (Enabled && IsNormalRun() && ZetArtifactsPlugin.HoardifactDifficulty.Value)
 			{
 				UpdateKleptoValue();
 			}
-			else
-			{
-				ResetKleptoValue();
-			}
+
+			UpdateMysticTime();
+
+			UpdateUI();
 		}
 
 		private static void CharacterBody_onBodyInventoryChangedGlobal(CharacterBody body)
@@ -173,6 +240,7 @@ namespace TPDespair.ZetArtifacts
 				else
 				{
 					ResetKleptoValue();
+					UpdateUI();
 				}
 			}
 		}
@@ -200,12 +268,13 @@ namespace TPDespair.ZetArtifacts
 			RecalcTimer = 0.25f;
 
 			AddedElapsedTime = 0f;
-
-			UpdateUI();
 		}
 
 		private static void UpdateKleptoValue()
 		{
+			Recalc = false;
+			RecalcTimer = 0.25f;
+
 			if (Run.instance)
 			{
 				float playerCount = 0f;
@@ -253,8 +322,6 @@ namespace TPDespair.ZetArtifacts
 					itemScore /= playerCount;
 					AddedElapsedTime = Mathf.Max(AddedElapsedTime, itemScore * Mathf.Pow(playerCount, ZetArtifactsPlugin.HoardifactPlayerExponent.Value));
 				}
-
-				UpdateUI();
 			}
 		}
 
@@ -318,7 +385,8 @@ namespace TPDespair.ZetArtifacts
 			{
 				string text = "";
 
-				if (AddedElapsedTime > 0f) text = "+" + FormatTimer(AddedElapsedTime);
+				float totalTime = AddedElapsedTime + AddedMysticTime;
+				if (totalTime > 0f) text = "+" + FormatTimer(totalTime);
 
 				if (text != CurrentTimeText)
 				{

@@ -149,6 +149,7 @@ namespace TPDespair.ZetArtifacts
 			MarkedDropletBypassHook();
 
 			SceneDirector.onGenerateInteractableCardSelection += RemoveScrapperCard;
+			On.RoR2.BazaarController.Start += AddBazaarScrapper;
 		}
 
 		internal static void LateSetup()
@@ -658,6 +659,29 @@ namespace TPDespair.ZetArtifacts
 		{
 			GameObject prefab = card.spawnCard.prefab;
 			return !prefab.GetComponent<ScrapperController>();
+		}
+
+		private static void AddBazaarScrapper(On.RoR2.BazaarController.orig_Start orig, BazaarController self)
+		{
+			orig(self);
+
+			if (NetworkServer.active && Enabled && ZetArtifactsPlugin.DropifactBazaarScrapper.Value)
+			{
+				ArtifactDef artifactDef = ArtifactCatalog.FindArtifactDef("Sacrifice");
+				bool isSacrifice = RunArtifactManager.instance.IsArtifactEnabled(artifactDef);
+
+				if (isSacrifice) RunArtifactManager.instance.SetArtifactEnabledServer(artifactDef, false);
+
+				SpawnCard iscScrapper = LegacyResourcesAPI.Load<SpawnCard>("SpawnCards/InteractableSpawnCard/iscScrapper");
+				DirectorPlacementRule directPlacement = new DirectorPlacementRule { placementMode = DirectorPlacementRule.PlacementMode.Direct };
+				DirectorSpawnRequest spawnRequest = new DirectorSpawnRequest(iscScrapper, directPlacement, Run.instance.runRNG);
+
+				GameObject gameObject = iscScrapper.DoSpawn(new Vector3(-85f, -23.75f, -5f), Quaternion.identity, spawnRequest).spawnedInstance;
+				gameObject.transform.eulerAngles = new Vector3(0f, 165f, 0f);
+				NetworkServer.Spawn(gameObject);
+
+				if (isSacrifice) RunArtifactManager.instance.SetArtifactEnabledServer(artifactDef, true);
+			}
 		}
 
 

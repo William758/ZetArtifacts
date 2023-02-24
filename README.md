@@ -30,6 +30,8 @@ Use r2modman or place inside of Risk of Rain 2/Bepinex/Plugins/
 
 ## Changelog:
 
+v1.4.7 - Accumulation display now includes time added by Puzzle of Chronos from MysticsItems. Config to add scrapper to bazaar while using Artifact of Tossing.
+
 v1.4.6 - Added config for LeftAlt requirement for Tossing. Fix NRE when handling buffs.
 
 v1.4.5 - Added Blighted Elites to Escalation. Escalation has a chance to reroll T1 Elites into early T2 Elites.

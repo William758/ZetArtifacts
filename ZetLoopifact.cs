@@ -367,7 +367,7 @@ namespace TPDespair.ZetArtifacts
 				HandleReplacableEliteSet(equipNames);
 			}
 
-			ZetArtifactsPlugin.LogInfo("[ZetLoopifact] - Replacable Elite Types : " + ReplacableEliteTypes.Count );
+			ZetArtifactsPlugin.LogInfo("[ZetLoopifact] - Replaceable Elite Types : " + ReplacableEliteTypes.Count );
 		}
 
 		private static void HandleReplacableEliteSet(List<string> equipNames, bool count = true)
@@ -392,7 +392,7 @@ namespace TPDespair.ZetArtifacts
 				}
 				else
 				{
-					ZetArtifactsPlugin.LogWarn("[ZetLoopifact] - Failed to set elite as replacable! could not find equipment : " + equipName);
+					ZetArtifactsPlugin.LogWarn("[ZetLoopifact] - Failed to set elite as replaceable! Could not find equipment : " + equipName);
 				}
 			}
 
@@ -438,13 +438,13 @@ namespace TPDespair.ZetArtifacts
 					}
 					else
 					{
-						ZetArtifactsPlugin.LogWarn("[ZetLoopifact] - Failed to finalize elite! could not find an eliteDef using equipment : " + equipmentName);
+						ZetArtifactsPlugin.LogWarn("[ZetLoopifact] - Failed to finalize elite! Could not find an eliteDef using equipment : " + equipmentName);
 					}
 				}
 			}
 			else
 			{
-				ZetArtifactsPlugin.LogWarn("[ZetLoopifact] - Failed to finalize elite! could not find equipment : " + equipmentName);
+				ZetArtifactsPlugin.LogWarn("[ZetLoopifact] - Failed to finalize elite! Could not find equipment : " + equipmentName);
 			}
 
 			return false;

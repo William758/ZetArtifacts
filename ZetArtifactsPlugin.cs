@@ -26,7 +26,7 @@ namespace TPDespair.ZetArtifacts
 
 	public class ZetArtifactsPlugin : BaseUnityPlugin
 	{
-		public const string ModVer = "1.4.7";
+		public const string ModVer = "1.4.8";
 		public const string ModName = "ZetArtifacts";
 		public const string ModGuid = "com.TPDespair.ZetArtifacts";
 

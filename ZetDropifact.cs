@@ -4,6 +4,7 @@ using UnityEngine.Networking;
 using UnityEngine.EventSystems;
 using MonoMod.Cil;
 using Mono.Cecil.Cil;
+using HG;
 using RoR2;
 using RoR2.UI;
 using R2API;
@@ -414,6 +415,13 @@ namespace TPDespair.ZetArtifacts
 
 
 
+		private static int GetRealItemCount(Inventory inventory, ItemIndex itemIndex)
+		{
+			return ArrayUtils.GetSafe<int>(inventory.itemStacks, (int)itemIndex);
+		}
+
+
+
 		private static bool DropItem(CharacterBody body, Inventory inventory, EquipmentIndex index, float angle)
 		{
 			if (inventory.GetEquipmentIndex() != index) return false;
@@ -429,7 +437,7 @@ namespace TPDespair.ZetArtifacts
 		{
 			ItemIndex dropIndex = index;
 
-			if (inventory.GetItemCount(index) <= 0) return false;
+			if (GetRealItemCount(inventory, index) <= 0) return false;
 
 			if (scrap)
 			{

@@ -401,10 +401,8 @@ namespace TPDespair.ZetArtifacts
 		{
 			time = Mathf.Ceil(time * 100f);
 
-			float a, b;
-
-			a = Mathf.Floor(time / 6000f);
-			b = Mathf.Floor((time % 6000f) / 100f);
+			float a = Mathf.Floor(time / 6000f);
+			float b = Mathf.Floor((time % 6000f) / 100f);
 
 			return a + ":" + b.ToString("00");
 		}
@@ -415,7 +413,10 @@ namespace TPDespair.ZetArtifacts
 		{
 			On.RoR2.SceneDirector.PopulateScene += (orig, self) =>
 			{
-				self.interactableCredit = Mathf.CeilToInt(self.interactableCredit * Mathf.Max(1f, 1f + ZetArtifactsPlugin.HoardifactSetupMoney.Value));
+				if (Enabled)
+				{
+					self.interactableCredit = Mathf.CeilToInt(self.interactableCredit * Mathf.Max(1f, 1f + ZetArtifactsPlugin.HoardifactSetupMoney.Value));
+				}
 
 				orig(self);
 			};

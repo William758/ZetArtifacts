@@ -30,6 +30,8 @@ Use r2modman or place inside of Risk of Rain 2/Bepinex/Plugins/
 
 ## Changelog:
 
+v1.4.9 - Tossed items will once again drop as command cubes when Artifact of Command is active.
+
 v1.4.8 - Prevent tossing items gained through fake inventories. Only increase interactable spawns if artifact is enabled.
 
 v1.4.7 - Accumulation display now includes time added by Puzzle of Chronos from MysticsItems. Config to add scrapper to bazaar while using Artifact of Tossing.

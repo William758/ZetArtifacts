@@ -11,6 +11,7 @@ using R2API;
 using R2API.Utils;
 using R2API.Networking;
 using R2API.Networking.Interfaces;
+using RoR2.Artifacts;
 
 namespace TPDespair.ZetArtifacts
 {
@@ -25,12 +26,13 @@ namespace TPDespair.ZetArtifacts
 			ZetDropifact.HandlePointerClick(this, eventData);
 		}
 	}
-
+	/*
 	public class ZetDropMarker : MonoBehaviour
 	{
 		// used to check if droplet should not be affected by artifact of command
+		// no longer required as we can just set the command flag on the droplet
 	}
-
+	*/
 
 
 	public class ZetDropReply : INetMessage
@@ -147,7 +149,7 @@ namespace TPDespair.ZetArtifacts
 			ItemIconHook();
 			EquipmentIconHook();
 
-			MarkedDropletBypassHook();
+			//MarkedDropletBypassHook();
 
 			SceneDirector.onGenerateInteractableCardSelection += RemoveScrapperCard;
 			On.RoR2.BazaarController.Start += AddBazaarScrapper;
@@ -510,6 +512,11 @@ namespace TPDespair.ZetArtifacts
 		{
 			GenericPickupController.CreatePickupInfo pickupInfo = new GenericPickupController.CreatePickupInfo { rotation = Quaternion.identity, pickupIndex = pickupIndex };
 
+			if (!ZetArtifactsPlugin.DropifactBypassGround.Value && CommandArtifactManager.IsCommandArtifactEnabled)
+			{
+				pickupInfo.artifactFlag |= GenericPickupController.PickupArtifactFlag.COMMAND;
+			}
+
 			GameObject droplet = UnityEngine.Object.Instantiate(PickupDropletController.pickupDropletPrefab, position, Quaternion.identity);
 
 			PickupDropletController controller = droplet.GetComponent<PickupDropletController>();
@@ -523,7 +530,8 @@ namespace TPDespair.ZetArtifacts
 			rigidBody.velocity = velocity;
 			rigidBody.AddTorque(UnityEngine.Random.Range(150f, 120f) * UnityEngine.Random.onUnitSphere);
 
-			droplet.AddComponent<ZetDropMarker>();
+			// no longer required as we can just add the command flag
+			//droplet.AddComponent<ZetDropMarker>();
 
 			NetworkServer.Spawn(droplet);
 		}
@@ -626,7 +634,7 @@ namespace TPDespair.ZetArtifacts
 		}
 
 
-
+		/*
 		private static void MarkedDropletBypassHook()
 		{
 			On.RoR2.PickupDropletController.OnCollisionEnter += (orig, self, collision) =>
@@ -652,7 +660,7 @@ namespace TPDespair.ZetArtifacts
 				orig(self, collision);
 			};
 		}
-
+		*/
 
 
 		private static void RemoveScrapperCard(SceneDirector sceneDirector, DirectorCardCategorySelection dccs)

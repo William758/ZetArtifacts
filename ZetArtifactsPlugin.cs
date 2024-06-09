@@ -26,7 +26,7 @@ namespace TPDespair.ZetArtifacts
 
 	public class ZetArtifactsPlugin : BaseUnityPlugin
 	{
-		public const string ModVer = "1.4.8";
+		public const string ModVer = "1.4.9";
 		public const string ModName = "ZetArtifacts";
 		public const string ModGuid = "com.TPDespair.ZetArtifacts";
 
@@ -217,7 +217,7 @@ namespace TPDespair.ZetArtifacts
 			);
 			DropifactBypassGround = Config.Bind(
 				"Artifacts", "dropifactBypassGround", false,
-				"Drop items directly on contact with the ground. Bypass onDropletHitGroundServer event, which includes Artifact of Command."
+				"Drop items directly when Artifact of Command is active. If set to false, dropped items will grant a new command cube when Artifact of Command is active."
 			);
 			DropifactRemoveScrapper = Config.Bind(
 				"Artifacts", "dropifactRemoveScrapper", false,

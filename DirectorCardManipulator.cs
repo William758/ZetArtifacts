@@ -198,9 +198,9 @@ namespace TPDespair.ZetArtifacts
 
 
 
-		private static void GatherMonsterCardsHook(On.RoR2.ClassicStageInfo.orig_RebuildCards orig, ClassicStageInfo self)
+		private static void GatherMonsterCardsHook(On.RoR2.ClassicStageInfo.orig_RebuildCards orig, ClassicStageInfo self, DirectorCardCategorySelection dccsMon, DirectorCardCategorySelection dccsInt)
 		{
-			orig(self);
+			orig(self, dccsMon, dccsInt);
 
 			GatherMonsterCards(self);
 		}

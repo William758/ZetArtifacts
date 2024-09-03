@@ -24,11 +24,13 @@ Artifact of the Eclipse - Enables all Eclipse modifiers.
 
 ## Installation:
 
-Requires Bepinex and R2API.
+Requires Bepinex and R2API : Core , Language , Networking , Elites.
 
 Use r2modman or place inside of Risk of Rain 2/Bepinex/Plugins/
 
 ## Changelog:
+
+v1.5.0 - Updated for SotS
 
 v1.4.9 - Tossed items will once again drop as command cubes when Artifact of Command is active.
 

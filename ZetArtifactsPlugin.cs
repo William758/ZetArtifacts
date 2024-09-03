@@ -6,8 +6,6 @@ using BepInEx.Logging;
 using RoR2;
 using RoR2.ContentManagement;
 using R2API;
-using R2API.Utils;
-using R2API.Networking;
 
 using System.Security;
 using System.Security.Permissions;
@@ -20,13 +18,14 @@ using System.Security.Permissions;
 namespace TPDespair.ZetArtifacts
 {
 	[BepInPlugin(ModGuid, ModName, ModVer)]
-	[BepInDependency(R2API.R2API.PluginGUID)]
-	[R2APISubmoduleDependency(nameof(LanguageAPI), nameof(EliteAPI), nameof(NetworkingAPI))]
+	[BepInDependency(R2API.EliteAPI.PluginGUID, BepInDependency.DependencyFlags.HardDependency)]
+	[BepInDependency(R2API.LanguageAPI.PluginGUID, BepInDependency.DependencyFlags.HardDependency)]
+	[BepInDependency(R2API.Networking.NetworkingAPI.PluginGUID, BepInDependency.DependencyFlags.HardDependency)]
 	[BepInDependency("com.TPDespair.DiluvianArtifact", BepInDependency.DependencyFlags.SoftDependency)]
 
 	public class ZetArtifactsPlugin : BaseUnityPlugin
 	{
-		public const string ModVer = "1.4.9";
+		public const string ModVer = "1.5.0";
 		public const string ModName = "ZetArtifacts";
 		public const string ModGuid = "com.TPDespair.ZetArtifacts";
 

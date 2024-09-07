@@ -30,6 +30,8 @@ Use r2modman or place inside of Risk of Rain 2/Bepinex/Plugins/
 
 ## Changelog:
 
+v1.5.1 - Fixed Eclipse 8 effect on artifact.
+
 v1.5.0 - Updated for SotS
 
 v1.4.9 - Tossed items will once again drop as command cubes when Artifact of Command is active.

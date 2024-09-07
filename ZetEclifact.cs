@@ -32,7 +32,7 @@ namespace TPDespair.ZetArtifacts
 			IL.RoR2.HealthComponent.Heal += Eclipse5Hook;
 			IL.RoR2.DeathRewards.OnKilledServer += Eclipse6Hook;
 			IL.RoR2.CharacterBody.RecalculateStats += Eclipse7Hook;
-			IL.RoR2.HealthComponent.TakeDamage += Eclipse8Hook;
+			IL.RoR2.HealthComponent.TakeDamageProcess += Eclipse8Hook;
 		}
 
 		private static void DisableEffects()
@@ -44,7 +44,7 @@ namespace TPDespair.ZetArtifacts
 			IL.RoR2.HealthComponent.Heal -= Eclipse5Hook;
 			IL.RoR2.DeathRewards.OnKilledServer -= Eclipse6Hook;
 			IL.RoR2.CharacterBody.RecalculateStats -= Eclipse7Hook;
-			IL.RoR2.HealthComponent.TakeDamage -= Eclipse8Hook;
+			IL.RoR2.HealthComponent.TakeDamageProcess -= Eclipse8Hook;
 		}
 
 

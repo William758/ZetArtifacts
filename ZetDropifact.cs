@@ -95,8 +95,11 @@ namespace TPDespair.ZetArtifacts
 				// Request from client
 				if (ZetDropifact.HandleClientRequest(this))
 				{
+					int dropType = this.DropType;
+					if (dropType == 1 && !ZetArtifactsPlugin.DropifactAllowScrapping.Value) dropType = 0;
+
 					// Notify clients about success
-					ZetDropReply dropReply = new ZetDropReply { Body = Body, DropType = DropType, Index = Index };
+					ZetDropReply dropReply = new ZetDropReply { Body = Body, DropType = dropType, Index = Index };
 					dropReply.Send(NetworkDestination.Clients);
 				}
 			}
@@ -141,7 +144,7 @@ namespace TPDespair.ZetArtifacts
 			if (State < 1) return;
 
 			ZetArtifactsPlugin.RegisterToken("ARTIFACT_ZETDROPIFACT_NAME", "Artifact of Tossing");
-			ZetArtifactsPlugin.RegisterToken("ARTIFACT_ZETDROPIFACT_DESC", "Allows players to drop and scrap items.\n\n<style=cStack>" + (ZetArtifactsPlugin.DropifactAltScrap.Value ? "LeftAlt + " : "") + "RMB to scrap</style>");
+			ZetArtifactsPlugin.RegisterToken("ARTIFACT_ZETDROPIFACT_DESC", BuildDescription());
 
 			NetworkingAPI.RegisterMessageType<ZetDropReply>();
 			NetworkingAPI.RegisterMessageType<ZetDropRequest>();
@@ -187,6 +190,23 @@ namespace TPDespair.ZetArtifacts
 
 
 
+		public static string BuildDescription()
+		{
+			string str = "Allows players to drop";
+
+			if (ZetArtifactsPlugin.DropifactAllowScrapping.Value) str += " and scrap";
+			str += " items.";
+			if (ZetArtifactsPlugin.DropifactAllowScrapping.Value)
+			{
+				str += "\n\n<style=cStack>";
+				str += (ZetArtifactsPlugin.DropifactAltScrap.Value ? "LeftAlt + " : "") + "RMB to scrap</style>";
+			}
+
+			return str;
+		}
+
+
+
 		internal static void HandlePointerClick(ZetDropHandler handler, PointerEventData eventData)
 		{
 			if (!Enabled) return;
@@ -199,7 +219,7 @@ namespace TPDespair.ZetArtifacts
 			CharacterBody body = master.GetBody();
 			if (!body) return;
 
-			bool scrap = (!ZetArtifactsPlugin.DropifactAltScrap.Value || Input.GetKey(KeyCode.LeftAlt)) && eventData.button == PointerEventData.InputButton.Right;
+			bool scrap = ZetArtifactsPlugin.DropifactAllowScrapping.Value && (!ZetArtifactsPlugin.DropifactAltScrap.Value || Input.GetKey(KeyCode.LeftAlt)) && eventData.button == PointerEventData.InputButton.Right;
 
 			float aimAngle = GetAimAngle(body);
 
@@ -212,7 +232,7 @@ namespace TPDespair.ZetArtifacts
 				{
 					EquipmentIndex equipIndex = inventory.GetEquipmentIndex();
 
-					if (!ValidDropRequest(equipIndex, scrap)) return;
+					if (!ValidDropRequest(equipIndex, false)) return;
 
 					dropMessage = new ZetDropRequest { Body = body, DropType = 2, Index = (int)equipIndex, Angle = aimAngle };
 				}
@@ -237,7 +257,7 @@ namespace TPDespair.ZetArtifacts
 				{
 					EquipmentIndex equipIndex = inventory.GetEquipmentIndex();
 
-					if (!ValidDropRequest(equipIndex, scrap)) return;
+					if (!ValidDropRequest(equipIndex, false)) return;
 
 					if (DropItem(body, inventory, equipIndex, aimAngle)) CreateNotification(body, equipIndex);
 				}
@@ -298,7 +318,7 @@ namespace TPDespair.ZetArtifacts
 			}
 			else
 			{
-				bool scrap = dropRequest.DropType == 1;
+				bool scrap = ZetArtifactsPlugin.DropifactAllowScrapping.Value && dropRequest.DropType == 1;
 
 				ItemIndex itemIndex = (ItemIndex)dropRequest.Index;
 

@@ -415,7 +415,12 @@ namespace TPDespair.ZetArtifacts
 			{
 				if (Enabled)
 				{
+					int startingCredits = self.interactableCredit;
 					self.interactableCredit = Mathf.CeilToInt(self.interactableCredit * Mathf.Max(1f, 1f + ZetArtifactsPlugin.HoardifactSetupMoney.Value));
+					if (startingCredits != self.interactableCredit)
+					{
+						ZetArtifactsPlugin.LogWarn("[ZetHoardifact] - SceneDirector.interactableCredit changed from " + startingCredits + " to " + self.interactableCredit);
+					}
 				}
 
 				orig(self);

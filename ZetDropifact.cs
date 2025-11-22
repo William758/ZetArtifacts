@@ -1,17 +1,18 @@
-﻿using System;
-using UnityEngine;
-using UnityEngine.Networking;
-using UnityEngine.EventSystems;
-using MonoMod.Cil;
+﻿using HG;
 using Mono.Cecil.Cil;
-using HG;
-using RoR2;
-using RoR2.UI;
+using MonoMod.Cil;
 using R2API;
-using R2API.Utils;
 using R2API.Networking;
 using R2API.Networking.Interfaces;
+using R2API.Utils;
+using RoR2;
 using RoR2.Artifacts;
+using RoR2.UI;
+using System;
+using System.ComponentModel;
+using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.Networking;
 
 namespace TPDespair.ZetArtifacts
 {
@@ -26,13 +27,7 @@ namespace TPDespair.ZetArtifacts
 			ZetDropifact.HandlePointerClick(this, eventData);
 		}
 	}
-	/*
-	public class ZetDropMarker : MonoBehaviour
-	{
-		// used to check if droplet should not be affected by artifact of command
-		// no longer required as we can just set the command flag on the droplet
-	}
-	*/
+
 
 
 	public class ZetDropReply : INetMessage
@@ -151,8 +146,6 @@ namespace TPDespair.ZetArtifacts
 
 			ItemIconHook();
 			EquipmentIconHook();
-
-			//MarkedDropletBypassHook();
 
 			SceneDirector.onGenerateInteractableCardSelection += RemoveScrapperCard;
 			On.RoR2.BazaarController.Start += AddBazaarScrapper;
@@ -439,7 +432,7 @@ namespace TPDespair.ZetArtifacts
 
 		private static int GetRealItemCount(Inventory inventory, ItemIndex itemIndex)
 		{
-			return ArrayUtils.GetSafe<int>(inventory.itemStacks, (int)itemIndex);
+			return inventory.permanentItemStacks.GetStackValue(itemIndex);
 		}
 
 
@@ -448,7 +441,7 @@ namespace TPDespair.ZetArtifacts
 		{
 			if (inventory.GetEquipmentIndex() != index) return false;
 
-			inventory.SetEquipmentIndex(EquipmentIndex.None);
+			inventory.SetEquipmentIndex(EquipmentIndex.None, true);
 
 			CreateDroplet(index, body.transform.position, angle);
 
@@ -487,7 +480,7 @@ namespace TPDespair.ZetArtifacts
 
 			if (dropIndex == ItemIndex.None) return false;
 
-			inventory.RemoveItem(index, 1);
+			inventory.RemoveItemPermanent(index, 1);
 
 			CreateDroplet(dropIndex, body.transform.position, angle);
 
@@ -523,14 +516,19 @@ namespace TPDespair.ZetArtifacts
 
 		private static void CreateDroplet(PickupIndex index, Vector3 pos, float angle)
 		{
-			CreateMarkedPickupDroplet(index, pos, Vector3.up * 20f + (Quaternion.AngleAxis(angle, Vector3.up) * (Vector3.forward * 10f)));
+			CreatePickupDroplet(index, pos, Vector3.up * 20f + (Quaternion.AngleAxis(angle, Vector3.up) * (Vector3.forward * 10f)));
 		}
 
 
 
-		private static void CreateMarkedPickupDroplet(PickupIndex pickupIndex, Vector3 position, Vector3 velocity)
+		private static void CreatePickupDroplet(PickupIndex pickupIndex, Vector3 position, Vector3 velocity)
 		{
-			GenericPickupController.CreatePickupInfo pickupInfo = new GenericPickupController.CreatePickupInfo { rotation = Quaternion.identity, pickupIndex = pickupIndex };
+			GenericPickupController.CreatePickupInfo pickupInfo = new GenericPickupController.CreatePickupInfo
+			{
+				pickup = new UniquePickup(pickupIndex),
+				rotation = Quaternion.identity, 
+				recycled = !ZetArtifactsPlugin.DropifactAllowRecycling.Value
+			};
 
 			if (!ZetArtifactsPlugin.DropifactBypassGround.Value && CommandArtifactManager.IsCommandArtifactEnabled)
 			{
@@ -543,15 +541,12 @@ namespace TPDespair.ZetArtifacts
 			if (controller)
 			{
 				controller.createPickupInfo = pickupInfo;
-				controller.NetworkpickupIndex = pickupInfo.pickupIndex;
+				controller.NetworkpickupState = pickupInfo.pickup;
 			}
 
 			Rigidbody rigidBody = droplet.GetComponent<Rigidbody>();
 			rigidBody.velocity = velocity;
 			rigidBody.AddTorque(UnityEngine.Random.Range(150f, 120f) * UnityEngine.Random.onUnitSphere);
-
-			// no longer required as we can just add the command flag
-			//droplet.AddComponent<ZetDropMarker>();
 
 			NetworkServer.Spawn(droplet);
 		}
@@ -621,7 +616,7 @@ namespace TPDespair.ZetArtifacts
 		{
 			if (icon.GetComponent<ZetDropHandler>() != null) return;
 			var dropItemHandler = icon.transform.gameObject.AddComponent<ZetDropHandler>();
-			dropItemHandler.GetItemIndex = () => icon.GetFieldValue<ItemIndex>("itemIndex");
+			dropItemHandler.GetItemIndex = () => icon.itemIndex;
 			dropItemHandler.GetInventory = () => icon.rectTransform.parent.GetComponent<ItemInventoryDisplay>().GetFieldValue<Inventory>("inventory");
 		}
 
@@ -653,34 +648,6 @@ namespace TPDespair.ZetArtifacts
 			dropItemHandler.EquipmentIcon = true;
 		}
 
-
-		/*
-		private static void MarkedDropletBypassHook()
-		{
-			On.RoR2.PickupDropletController.OnCollisionEnter += (orig, self, collision) =>
-			{
-				if (NetworkServer.active && self.alive)
-				{
-					if (self.GetComponent<ZetDropMarker>())
-					{
-						if (ZetArtifactsPlugin.DropifactBypassGround.Value)
-						{
-							self.alive = false;
-							self.createPickupInfo.position = self.transform.position;
-
-							GenericPickupController.CreatePickup(self.createPickupInfo);
-
-							UnityEngine.Object.Destroy(self.gameObject);
-
-							return;
-						}
-					}
-				}
-
-				orig(self, collision);
-			};
-		}
-		*/
 
 
 		private static void RemoveScrapperCard(SceneDirector sceneDirector, DirectorCardCategorySelection dccs)

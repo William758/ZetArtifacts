@@ -30,6 +30,8 @@ Use r2modman or place inside of Risk of Rain 2/Bepinex/Plugins/
 
 ## Changelog:
 
+v1.6.0 - Updated for latest game version.
+
 v1.5.2 - Added config to disable mouse scrapping with Artifact of Tossing.
 
 v1.5.1 - Fixed Eclipse 8 effect on artifact.

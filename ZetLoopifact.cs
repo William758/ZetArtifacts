@@ -17,7 +17,7 @@ namespace TPDespair.ZetArtifacts
 		private static bool AragonFinalized = false;
 		private static bool BlightedFinalized = false;
 
-		private static List<EquipmentDef> ReplacableEliteTypes = new List<EquipmentDef>();
+		private static List<EquipmentDef> ReplaceableEliteTypes = new List<EquipmentDef>();
 		private static int EliteModCount = 0;
 
 		internal static int State = 0;
@@ -60,7 +60,7 @@ namespace TPDespair.ZetArtifacts
 		{
 			if (State < 1) return;
 
-			BuildReplacableElites();
+			BuildReplaceableElites();
 			FinalizeEliteProperties();
 		}
 
@@ -278,7 +278,7 @@ namespace TPDespair.ZetArtifacts
 
 		private static bool RollReplaceEliteDef(EquipmentDef equip)
 		{
-			if (ReplacableEliteTypes.Contains(equip))
+			if (ReplaceableEliteTypes.Contains(equip))
 			{
 				float chance = ZetArtifactsPlugin.LoopifactEliteReplacementChance.Value;
 
@@ -341,36 +341,36 @@ namespace TPDespair.ZetArtifacts
 			ZetArtifactsPlugin.LogInfo("[ZetLoopifact] - ApplyEarlyEliteProperties");
 		}
 
-		private static void BuildReplacableElites()
+		private static void BuildReplaceableElites()
 		{
-			ReplacableEliteTypes.Clear();
+			ReplaceableEliteTypes.Clear();
 			EliteModCount = 0;
 
 			List<string> equipNames = new List<string> { "EliteFireEquipment", "EliteIceEquipment", "EliteLightningEquipment", "EliteEarthEquipment" };
-			HandleReplacableEliteSet(equipNames, false);
+			HandleReplaceableEliteSet(equipNames, false);
 
 			if (ZetArtifactsPlugin.PluginLoaded("com.plasmacore.PlasmaCoreSpikestripContent"))
 			{
 				equipNames = new List<string> { "EQUIPMENT_AFFIXPLATED", "EQUIPMENT_AFFIXWARPED", "EQUIPMENT_AFFIXVEILED" };
-				HandleReplacableEliteSet(equipNames);
+				HandleReplaceableEliteSet(equipNames);
 			}
 
 			if (ZetArtifactsPlugin.PluginLoaded("com.KomradeSpectre.Aetherium"))
 			{
 				equipNames = new List<string> { "AETHERIUM_ELITE_EQUIPMENT_AFFIX_SANGUINE" };
-				HandleReplacableEliteSet(equipNames);
+				HandleReplaceableEliteSet(equipNames);
 			}
 
 			if (ZetArtifactsPlugin.PluginLoaded("com.PopcornFactory.WispMod"))
 			{
 				equipNames = new List<string> { "WARFRAMEWISP_ELITE_EQUIPMENT_AFFIX_NULLIFIER" };
-				HandleReplacableEliteSet(equipNames);
+				HandleReplaceableEliteSet(equipNames);
 			}
 
-			ZetArtifactsPlugin.LogInfo("[ZetLoopifact] - Replaceable Elite Types : " + ReplacableEliteTypes.Count );
+			ZetArtifactsPlugin.LogInfo("[ZetLoopifact] - Replaceable Elite Types : " + ReplaceableEliteTypes.Count );
 		}
 
-		private static void HandleReplacableEliteSet(List<string> equipNames, bool count = true)
+		private static void HandleReplaceableEliteSet(List<string> equipNames, bool count = true)
 		{
 			bool foundAny = false;
 
@@ -384,9 +384,9 @@ namespace TPDespair.ZetArtifacts
 					{
 						foundAny = true;
 
-						if (!ReplacableEliteTypes.Contains(equip))
+						if (!ReplaceableEliteTypes.Contains(equip))
 						{
-							ReplacableEliteTypes.Add(equip);
+							ReplaceableEliteTypes.Add(equip);
 						}
 					}
 				}

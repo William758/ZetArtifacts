@@ -25,7 +25,7 @@ namespace TPDespair.ZetArtifacts
 
 	public class ZetArtifactsPlugin : BaseUnityPlugin
 	{
-		public const string ModVer = "1.5.2";
+		public const string ModVer = "1.6.0";
 		public const string ModName = "ZetArtifacts";
 		public const string ModGuid = "com.TPDespair.ZetArtifacts";
 
@@ -57,6 +57,7 @@ namespace TPDespair.ZetArtifacts
 		public static ConfigEntry<int> DropifactEnable { get; set; }
 		public static ConfigEntry<bool> DropifactBypassGround { get; set; }
 		public static ConfigEntry<bool> DropifactAllowScrapping { get; set; }
+		public static ConfigEntry<bool> DropifactAllowRecycling { get; set; }
 		public static ConfigEntry<bool> DropifactRemoveScrapper { get; set; }
 		public static ConfigEntry<bool> DropifactBazaarScrapper { get; set; }
 		public static ConfigEntry<bool> DropifactAltScrap { get; set; }
@@ -222,6 +223,10 @@ namespace TPDespair.ZetArtifacts
 			DropifactAllowScrapping = Config.Bind(
 				"Artifacts", "dropifactAllowScrapping", true,
 				"Allow scrapping with mouse while artifact is active."
+			);
+			DropifactAllowRecycling = Config.Bind(
+				"Artifacts", "dropifactAllowRecycling", true,
+				"Allow dropped items to be recycled."
 			);
 			DropifactRemoveScrapper = Config.Bind(
 				"Artifacts", "dropifactRemoveScrapper", false,

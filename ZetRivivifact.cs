@@ -33,21 +33,20 @@ namespace TPDespair.ZetArtifacts
 
 			SaveDeathPositionHook();
 			RevivalHook();
+
+			ArenaMissionController.onBeatArena += ArenaMissionController_onBeatArena;
 		}
 
-
+		
 
 		private static void SaveDeathPositionHook()
 		{
 			On.RoR2.CharacterMaster.OnBodyDeath += (orig, self, body) =>
 			{
-				if (NetworkServer.active)
+				if (NetworkServer.active && Enabled)
 				{
-					if (Enabled)
-					{
-						self.transform.position = body.footPosition;
-						self.transform.rotation = body.transform.rotation;
-					}
+					self.transform.position = body.footPosition;
+					self.transform.rotation = body.transform.rotation;
 				}
 
 				orig(self, body);
@@ -60,37 +59,47 @@ namespace TPDespair.ZetArtifacts
 			{
 				orig(self, bossGroup);
 
-				if (NetworkServer.active)
+				if (NetworkServer.active && Enabled)
 				{
-					if (Enabled)
-					{
-						if (Run.instance && Run.instance.livingPlayerCount > 0)
-						{
-							foreach (NetworkUser networkUser in NetworkUser.readOnlyInstancesList)
-							{
-								if (networkUser.isActiveAndEnabled)
-								{
-									CharacterMaster master = networkUser.master;
-
-									if (master.IsDeadAndOutOfLivesServer() || !master.GetBody() || !master.GetBody().healthComponent.alive)
-									{
-										RespawnAtDeathPoint(master);
-									}
-								}
-							}
-						}
-					}
+					AttemptReviveDeadPlayers();
 				}
 			};
 		}
 
+		private static void ArenaMissionController_onBeatArena()
+		{
+			if (NetworkServer.active && Enabled)
+			{
+				AttemptReviveDeadPlayers();
+			}
+		}
 
+
+
+		private static void AttemptReviveDeadPlayers()
+		{
+			if (Run.instance && Run.instance.livingPlayerCount > 0)
+			{
+				foreach (NetworkUser networkUser in NetworkUser.readOnlyInstancesList)
+				{
+					if (networkUser.isActiveAndEnabled)
+					{
+						CharacterMaster master = networkUser.master;
+
+						if (master.IsDeadAndOutOfLivesServer() || !master.GetBody() || !master.GetBody().healthComponent.alive)
+						{
+							RespawnAtDeathPoint(master);
+						}
+					}
+				}
+			}
+		}
 
 		private static void RespawnAtDeathPoint(CharacterMaster master)
 		{
 			Vector3 position = master.transform.position;
 			Quaternion rotation = master.transform.rotation;
-			master.Respawn(position, rotation);
+			master.Respawn(position, rotation, true);
 		}
 	}
 }

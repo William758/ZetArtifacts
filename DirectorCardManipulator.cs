@@ -83,9 +83,10 @@ namespace TPDespair.ZetArtifacts
 		{
 			int value = origDirectorCardCostGetter(directorCard);
 
-			if (Active)
+			if (Active && directorCard.spawnCard)
 			{
 				string spawnCardName = directorCard.spawnCard.name;
+				if (spawnCardName == null) return value;
 
 				if (ZetLoopifact.Enabled && MonsterCardNames.Contains(spawnCardName))
 				{
@@ -216,10 +217,16 @@ namespace TPDespair.ZetArtifacts
 
 					DirectorCard directorCard = choiceInfo.value;
 					SpawnCard spawnCard = directorCard.spawnCard;
-
-					if (!MonsterCardNames.Contains(spawnCard.name))
+					if (spawnCard)
 					{
-						MonsterCardNames.Add(spawnCard.name);
+						string spawnCardName = spawnCard.name;
+						if (spawnCardName != null)
+						{
+							if (!MonsterCardNames.Contains(spawnCardName))
+							{
+								MonsterCardNames.Add(spawnCardName);
+							}
+						}
 					}
 				}
 			}
@@ -230,30 +237,24 @@ namespace TPDespair.ZetArtifacts
 			for (int i = 0; i < dccs.categories.Length; i++)
 			{
 				DirectorCardCategorySelection.Category catagory = dccs.categories[i];
-
 				string catagoryName = catagory.name;
-
-				//ZetArtifactsPlugin.LogInfo("[Manipulator] - DDCS Category : " + catagoryName);
-
-				if (ApplyToCategory(catagoryName))
+				if (catagoryName != null && ApplyToCategory(catagoryName))
 				{
 					for (int j = catagory.cards.Length - 1; j >= 0; j--)
 					{
 						DirectorCard directorCard = catagory.cards[j];
 						SpawnCard spawnCard = directorCard.spawnCard;
-
-						if (!InteractableCardNames.Contains(spawnCard.name))
+						if (spawnCard)
 						{
-							InteractableCardNames.Add(spawnCard.name);
+							string spawnCardName = spawnCard.name;
+							if (spawnCardName != null)
+							{
+								if (!InteractableCardNames.Contains(spawnCardName))
+								{
+									InteractableCardNames.Add(spawnCardName);
+								}
+							}
 						}
-
-						/*
-						ZetArtifactsPlugin.LogInfo("-----");
-						ZetArtifactsPlugin.LogInfo(directorCard.spawnCard);
-						ZetArtifactsPlugin.LogInfo("Cost : " + directorCard.spawnCard.directorCreditCost);
-						ZetArtifactsPlugin.LogInfo("Weight : " + directorCard.selectionWeight);
-						ZetArtifactsPlugin.LogInfo("Stages : " + directorCard.minimumStageCompletions);
-						//*/
 					}
 				}
 			}

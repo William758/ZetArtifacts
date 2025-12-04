@@ -12,7 +12,7 @@ Artifact of Revival - Dead players respawn after the boss is defeated.
 
 Artifact of Tossing - Allows players to drop and scrap items. (LeftAlt + RMB to scrap)
 
-Artifact of Multitudes - Double player count scaling. (stacks multiplicatively with original multitudes mod)
+Artifact of Multitudes - Double player count scaling. (stacks multiplicatively with other multitudes mods)
 
 Artifact of Sanction - Monster and Interactable types can appear earlier.
 
@@ -30,7 +30,11 @@ Use r2modman or place inside of Risk of Rain 2/Bepinex/Plugins/
 
 ## Changelog:
 
-v1.6.0 - Updated for latest game version.
+v1.6.2 - Added Artifact of the Bazaar support for BazaarIsMyHaven.
+
+v1.6.1 - NullCheck Director Manipulator.
+
+v1.6.0 - Updated for latest game version. Revival after VoidFields completion.
 
 v1.5.2 - Added config to disable mouse scrapping with Artifact of Tossing.
 

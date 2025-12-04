@@ -1,5 +1,4 @@
-﻿using HG;
-using Mono.Cecil.Cil;
+﻿using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using R2API;
 using R2API.Networking;
@@ -9,7 +8,6 @@ using RoR2;
 using RoR2.Artifacts;
 using RoR2.UI;
 using System;
-using System.ComponentModel;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.Networking;
@@ -333,6 +331,8 @@ namespace TPDespair.ZetArtifacts
 
 			if (!ZetArtifactsPlugin.DropifactLunar.Value && equipDef.isLunar) return false;
 			*/
+			if (!ZetArtifactsPlugin.DropifactEquipment.Value) return false;
+
 			if (scrap) return false;
 
 			return true;
@@ -523,6 +523,12 @@ namespace TPDespair.ZetArtifacts
 
 		private static void CreatePickupDroplet(PickupIndex pickupIndex, Vector3 position, Vector3 velocity)
 		{
+			if (!NetworkServer.active)
+			{
+				ZetArtifactsPlugin.LogWarn("[Server] function 'System.Void TPDespair.ZetDropifact::CreatePickupDroplet(RoR2.PickupIndex, UnityEngine.Vector3, UnityEngine.Vector3)' called on client");
+				return;
+			}
+
 			GenericPickupController.CreatePickupInfo pickupInfo = new GenericPickupController.CreatePickupInfo
 			{
 				pickup = new UniquePickup(pickupIndex),

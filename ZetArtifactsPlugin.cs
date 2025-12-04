@@ -25,7 +25,7 @@ namespace TPDespair.ZetArtifacts
 
 	public class ZetArtifactsPlugin : BaseUnityPlugin
 	{
-		public const string ModVer = "1.6.0";
+		public const string ModVer = "1.6.2";
 		public const string ModName = "ZetArtifacts";
 		public const string ModGuid = "com.TPDespair.ZetArtifacts";
 
@@ -35,6 +35,7 @@ namespace TPDespair.ZetArtifacts
 
 		public static ConfigEntry<int> BazaarifactEnable { get; set; }
 		public static ConfigEntry<bool> BazaarHomeExtraCauldrons { get; set; }
+		public static ConfigEntry<bool> BazaarHavenWanderingChef { get; set; }
 
 		public static ConfigEntry<int> RivivifactEnable { get; set; }
 
@@ -61,6 +62,7 @@ namespace TPDespair.ZetArtifacts
 		public static ConfigEntry<bool> DropifactRemoveScrapper { get; set; }
 		public static ConfigEntry<bool> DropifactBazaarScrapper { get; set; }
 		public static ConfigEntry<bool> DropifactAltScrap { get; set; }
+		public static ConfigEntry<bool> DropifactEquipment { get; set; }
 		public static ConfigEntry<bool> DropifactT1 { get; set; }
 		public static ConfigEntry<bool> DropifactT2 { get; set; }
 		public static ConfigEntry<bool> DropifactT3 { get; set; }
@@ -147,6 +149,10 @@ namespace TPDespair.ZetArtifacts
 			BazaarHomeExtraCauldrons = Config.Bind(
 				"Artifacts", "bazaarHomeExtraCauldrons", true,
 				"Allow additional cauldrons from BazaarIsMyHome even if artifact is available and not being used."
+			);
+			BazaarHavenWanderingChef = Config.Bind(
+				"Artifacts", "bazaarHavenWanderingChef", false,
+				"Allow wandering chef from BazaarIsMyHaven even if artifact is available and not being used."
 			);
 
 			RivivifactEnable = Config.Bind(
@@ -239,6 +245,10 @@ namespace TPDespair.ZetArtifacts
 			DropifactAltScrap = Config.Bind(
 				"Artifacts", "dropifactAltScrap", true,
 				"Set to false to scrap with RMB instead of Alt+RMB."
+			);
+			DropifactEquipment = Config.Bind(
+				"Artifacts", "dropifactEquipment", true,
+				"Allow dropping equipment."
 			);
 			DropifactT1 = Config.Bind(
 				"Artifacts", "dropifactT1", true,

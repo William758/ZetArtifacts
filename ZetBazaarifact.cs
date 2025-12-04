@@ -51,6 +51,7 @@ namespace TPDespair.ZetArtifacts
 
 				if (ZetArtifactsPlugin.PluginLoaded("com.zorp.ConfigurableBazaar")) ConfigurableBazaar();
 				if (ZetArtifactsPlugin.PluginLoaded("com.Lunzir.BazaarIsMyHome")) BazaarIsMyHome();
+				if (ZetArtifactsPlugin.PluginLoaded("Def.BazaarIsMyHaven")) BazaarIsMyHaven();
 			}
 		}
 
@@ -159,6 +160,46 @@ namespace TPDespair.ZetArtifacts
 				else
 				{
 					ZetArtifactsPlugin.LogWarn("[ZetBazaarifact] - Could Not Find Method : BazaarIsMyHome." + methodName);
+				}
+			}
+		}
+
+		private static void BazaarIsMyHaven()
+		{
+			BaseUnityPlugin Plugin = BepInEx.Bootstrap.Chainloader.PluginInfos["Def.BazaarIsMyHaven"].Instance;
+			Type PluginType = Plugin.GetType();
+			Assembly PluginAssembly = Assembly.GetAssembly(PluginType);
+
+			List<string> classNames = new List<string> { "BazaarPrinter", "BazaarScrapper", "BazaarEquipment", "BazaarCleansingPool", "BazaarRestack", "BazaarDonate", "BazaarDecorate" };
+
+			if (!ZetArtifactsPlugin.BazaarHomeExtraCauldrons.Value)
+			{
+				classNames.Add("BazaarCauldron");
+			}
+
+			if (!ZetArtifactsPlugin.BazaarHavenWanderingChef.Value)
+			{
+				classNames.Add("BazaarWanderingChef");
+			}
+
+			foreach (string className in classNames)
+			{
+				Type type = Type.GetType("BazaarIsMyHaven." + className +", " + PluginAssembly.FullName, false);
+				if (type != null)
+				{
+					MethodInfo methodInfo = type.GetMethod("SetupBazaar", Flags);
+					if (methodInfo != null)
+					{
+						HookEndpointManager.Modify(methodInfo, (ILContext.Manipulator)GenericReturnHook);
+					}
+					else
+					{
+						ZetArtifactsPlugin.LogWarn("[ZetBazaarifact] - Could Not Find Method : " + className + ".SetupBazaar");
+					}
+				}
+				else
+				{
+					ZetArtifactsPlugin.LogWarn("[ZetBazaarifact] - Could Not Find Type : BazaarIsMyHaven." + className);
 				}
 			}
 		}

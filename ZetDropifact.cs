@@ -666,8 +666,20 @@ namespace TPDespair.ZetArtifacts
 
 		private static bool NotScrapper(DirectorCard card)
 		{
-			GameObject prefab = card.spawnCard.prefab;
-			return !prefab.GetComponent<ScrapperController>();
+			if (card != null)
+			{
+				SpawnCard spawnCard = card.spawnCard;
+				if (spawnCard != null)
+				{
+					GameObject prefab = spawnCard.prefab;
+					if (prefab != null)
+					{
+						return !prefab.GetComponent<ScrapperController>();
+					}
+				}
+			}
+
+			return true;
 		}
 
 		private static void AddBazaarScrapper(On.RoR2.BazaarController.orig_Start orig, BazaarController self)

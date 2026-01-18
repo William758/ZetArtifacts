@@ -47,6 +47,7 @@ namespace TPDespair.ZetArtifacts
 				if (ZetArtifactsPlugin.PluginLoaded("com.MagnusMagnuson.BiggerBazaar")) BiggerBazaar();
 				if (ZetArtifactsPlugin.PluginLoaded("com.MagnusMagnuson.BazaarPrinter")) BazaarPrinter();
 				if (ZetArtifactsPlugin.PluginLoaded("com.NetherCrowCSOLYOO.BazaarExpand")) BazaarExpand();
+				if (ZetArtifactsPlugin.PluginLoaded("com.Susciety.BazaarExpand")) BazaarExpandSus();
 				if (ZetArtifactsPlugin.PluginLoaded("KevinPione.BazaareScrapper")) BazaareScrapper();
 
 				if (ZetArtifactsPlugin.PluginLoaded("com.zorp.ConfigurableBazaar")) ConfigurableBazaar();
@@ -98,7 +99,22 @@ namespace TPDespair.ZetArtifacts
 			}
 			else
 			{
-				ZetArtifactsPlugin.LogWarn("[ZetBazaarifact] - Could Not Find Method : BazaarExpand.SpawnExpand");
+				ZetArtifactsPlugin.LogWarn("[ZetBazaarifact] - Could Not Find Method : NC_BazaarExpand.SpawnExpand");
+			}
+		}
+
+		private static void BazaarExpandSus()
+		{
+			BaseUnityPlugin Plugin = BepInEx.Bootstrap.Chainloader.PluginInfos["com.Susciety.BazaarExpand"].Instance;
+
+			MethodInfo methodInfo = Plugin.GetType().GetMethod("SpawnExpand", Flags);
+			if (methodInfo != null)
+			{
+				HookEndpointManager.Modify(methodInfo, (ILContext.Manipulator)GenericReturnHook);
+			}
+			else
+			{
+				ZetArtifactsPlugin.LogWarn("[ZetBazaarifact] - Could Not Find Method : Sus_BazaarExpand.SpawnExpand");
 			}
 		}
 

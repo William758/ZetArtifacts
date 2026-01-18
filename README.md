@@ -30,6 +30,8 @@ Use r2modman or place inside of Risk of Rain 2/Bepinex/Plugins/
 
 ## Changelog:
 
+v1.6.4 - Added Artifact of the Bazaar support for BazaarExpansion.
+
 v1.6.3 - Fixed NRE related to interactable spawns.
 
 v1.6.2 - Added Artifact of the Bazaar support for BazaarIsMyHaven.
